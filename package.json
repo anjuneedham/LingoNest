@@ -1,0 +1,26 @@
+{
+  "name": "lingonest",
+  "private": true,
+  "version": "0.1.0",
+  "description": "LingoNest — a CEFR-structured language learning ecosystem: interactive lessons, AI practice and a human teacher marketplace.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspace @lingonest/core --workspace @lingonest/content",
+    "lint": "eslint . --ext .ts,.tsx",
+    "content:build": "npm run build --workspace @lingonest/content",
+    "content:validate": "npm run validate --workspace @lingonest/content",
+    "db:seed": "node scripts/seed-content.mjs",
+    "mobile": "npm run start --workspace @lingonest/mobile"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
