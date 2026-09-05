@@ -1,0 +1,25 @@
+{
+  "name": "@lingonest/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure TypeScript domain logic: CEFR, activities, evaluation, SRS, progress, pricing, booking. No platform dependencies.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
