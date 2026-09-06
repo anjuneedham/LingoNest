@@ -17,3 +17,4 @@ packages/content/dist/
 apps/mobile/ios/
 apps/mobile/android/
 packages/content/dist/
+apps/mobile/.expo/

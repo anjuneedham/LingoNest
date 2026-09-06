@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "LingoNest",
+    "slug": "lingonest",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "lingonest",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.lingonest.mobile",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "LingoNest records your voice only while you are doing a speaking exercise, so it can give you feedback on what you said.",
+        "NSSpeechRecognitionUsageDescription": "Speech recognition turns what you say into text so your speaking practice can be checked.",
+        "NSCameraUsageDescription": "Your camera is used only during a live lesson with a teacher you have booked.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "app.lingonest.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F172A"
+      },
+      "permissions": ["RECORD_AUDIO", "CAMERA", "MODIFY_AUDIO_SETTINGS"],
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "LingoNest records your voice only while you are doing a speaking exercise."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F172A",
+          "image": "./assets/splash.png",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": { "projectId": "" }
+    }
+  }
+}
