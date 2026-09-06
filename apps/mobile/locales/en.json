@@ -583,6 +583,8 @@
   "title": "Settings",
   "account": "Account",
   "notifications": "Notifications",
+  "languages": "Languages",
+  "languagesBody": "Switch which language you're learning, or add another.",
   "accessibility": "Accessibility",
   "privacy": "Privacy",
   "appearance": "Appearance",
@@ -807,6 +809,14 @@
   "resultTitle": "Here is your updated estimate",
   "done": "Done",
   "noneAvailable": "No check-up is available for this language yet."
+ },
+ "languages": {
+  "title": "Languages",
+  "subtitle": "Switch your active language, or add another one to learn.",
+  "current": "Current",
+  "switchTo": "Switch to {{name}}",
+  "addLanguage": "Add a language",
+  "allEnrolled": "You're already learning every language available."
  },
  "fieldGuide": {
   "title": "Field Guide",
