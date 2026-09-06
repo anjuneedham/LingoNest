@@ -84,8 +84,8 @@ export default function LessonPlayer() {
     });
 
     router.replace({
-      pathname: `/lesson/${lesson.id}/summary`,
-      params: { accuracy: String(player.accuracy), durationMs: String(durationMs) },
+      pathname: '/lesson/[lessonId]/summary',
+      params: { lessonId: lesson.id, accuracy: String(player.accuracy), durationMs: String(durationMs) },
     });
   }, [lesson, player, submitting]);
 

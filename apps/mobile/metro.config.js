@@ -16,4 +16,12 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.disableHierarchicalLookup = true;
 
+// Package-exports resolution picks some dependencies' ESM build (their
+// "import" condition) over the CJS one Metro can actually bundle safely for
+// every platform — zustand's ESM middleware bundle contains a bare
+// `import.meta` reference that is a hard parse error once Metro serves it as
+// a classic (non-module) script on web. The legacy main/browser-field
+// resolution these packages also ship does not have that problem.
+config.resolver.unstable_enablePackageExports = false;
+
 module.exports = config;
