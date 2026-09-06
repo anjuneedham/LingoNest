@@ -1,14 +1,17 @@
 import React, { useMemo } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { formatInZone, hoursUntil, type Recommendation } from '@lingonest/core';
 import { Badge, Button, Card, LevelPill, ProgressBar, Screen, Skeleton, SkeletonCard, Text } from '@/components';
+import { CreatureIllustration } from '@/components/creatures';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
 import { useLearningStore } from '@/store/learning';
+import { getSpecies } from '@/data/species';
+import { useSpeciesUnlocks, speciesIdForLanguage } from '@/hooks/useSpeciesUnlocks';
 
 /**
  * Home.
@@ -18,10 +21,21 @@ import { useLearningStore } from '@/store/learning';
  * to answer "where am I, what next, how am I doing" without scrolling (§96).
  */
 export default function Home() {
-  const { spacing } = useTheme();
+  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);
+  const { unlocked } = useSpeciesUnlocks();
+
+  const companion = useMemo(() => {
+    const forLanguage = languageCode ? speciesIdForLanguage(languageCode) : null;
+    const id = forLanguage && unlocked[forLanguage] ? forLanguage : 'doctor-bird';
+    return getSpecies(id);
+  }, [languageCode, unlocked]);
+  const companionFact = useMemo(
+    () => companion.naturalHistory[Math.floor(Math.random() * companion.naturalHistory.length)],
+    [companion],
+  );
 
   const snapshotQuery = useQuery({
     queryKey: ['home', profile?.id, languageCode],
@@ -85,6 +99,42 @@ export default function Home() {
               {profile?.displayName ?? ''}
             </Text>
           </View>
+
+          <Pressable
+            onPress={() => router.push('/field-guide')}
+            accessibilityRole="button"
+            accessibilityLabel={companion.commonName}
+            accessibilityHint={companionFact}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: spacing.sm,
+              padding: spacing.sm,
+              borderRadius: 16,
+              backgroundColor: theme.surfaceMuted,
+            }}
+          >
+            <View
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 26,
+                backgroundColor: theme.surface,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CreatureIllustration id={companion.id} size={40} />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text variant="caption" color="muted">
+                {companion.commonName}
+              </Text>
+              <Text variant="small" numberOfLines={2}>
+                {companionFact}
+              </Text>
+            </View>
+          </Pressable>
 
           {/* Where am I */}
           <Card style={{ marginTop: spacing.lg, borderColor: snapshot.goal.met ? '#16A34A' : undefined }}>

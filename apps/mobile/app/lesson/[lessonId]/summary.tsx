@@ -4,8 +4,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeInDown, BounceIn } from 'react-native-reanimated';
 import { Badge, Button, Card, ProgressBar, Screen, Text } from '@/components';
+import { CreatureIllustration } from '@/components/creatures';
 import { useTheme } from '@/theme/ThemeProvider';
 import { feedbackLessonComplete } from '@/services/feedback';
+import { useLearningStore } from '@/store/learning';
+import { getSpecies } from '@/data/species';
+import { useSpeciesUnlocks, speciesIdForLanguage } from '@/hooks/useSpeciesUnlocks';
 
 /**
  * The lesson summary.
@@ -22,6 +26,8 @@ export default function LessonSummary() {
   }>();
   const { theme, spacing } = useTheme();
   const { t } = useTranslation();
+  const languageCode = useLearningStore((s) => s.languageCode);
+  const { unlocked } = useSpeciesUnlocks();
 
   const accuracyValue = Number(accuracy ?? 0);
   const minutes = Math.max(1, Math.round(Number(durationMs ?? 0) / 60_000));
@@ -34,12 +40,23 @@ export default function LessonSummary() {
 
   const isMastered = accuracyValue >= 0.9;
   const isGood = accuracyValue >= 0.8;
-  const celebrationEmoji = isMastered ? '🏆' : isGood ? '✨' : '💪';
   const feedbackMessage = isMastered
     ? 'lesson.perfect'
     : isGood
       ? 'lesson.great'
       : 'lesson.keepGoing';
+
+  // The lesson's own language species hosts this screen once unlocked;
+  // Doctor Bird — always unlocked — greets every learner until then.
+  const hostSpeciesId = useMemo(() => {
+    const forLanguage = languageCode ? speciesIdForLanguage(languageCode) : null;
+    return forLanguage && unlocked[forLanguage] ? forLanguage : 'doctor-bird';
+  }, [languageCode, unlocked]);
+  const host = getSpecies(hostSpeciesId);
+  const fieldNote = useMemo(
+    () => host.naturalHistory[Math.floor(Math.random() * host.naturalHistory.length)],
+    [host],
+  );
 
   useEffect(() => {
     feedbackLessonComplete();
@@ -49,12 +66,22 @@ export default function LessonSummary() {
     <Screen>
       <Animated.View entering={FadeInDown}>
         <View style={{ alignItems: 'center', marginTop: spacing.xl }}>
-          <Animated.Text
-            style={{ fontSize: 56, marginBottom: spacing.md }}
+          <Animated.View
             entering={BounceIn.delay(200)}
+            style={{
+              width: 108,
+              height: 108,
+              borderRadius: 54,
+              backgroundColor: theme.surfaceMuted,
+              borderWidth: 3,
+              borderColor: tone,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: spacing.md,
+            }}
           >
-            {celebrationEmoji}
-          </Animated.Text>
+            <CreatureIllustration id={hostSpeciesId} size={82} />
+          </Animated.View>
           <Text variant="display" align="center">
             {t('lesson.summaryTitle')}
           </Text>
@@ -79,10 +106,23 @@ export default function LessonSummary() {
               flexWrap: 'wrap',
             }}
           >
-            <Badge label={t(feedbackMessage) || 'Great work!'} tone="primary" />
+            <Badge label={t(feedbackMessage)} tone="primary" />
             <Badge label={t('lesson.timeSpent')} glyph="⏱" />
             <Badge label={t('common.minutes', { count: minutes })} />
           </View>
+        </Card>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(150)}>
+        <Card style={{ marginTop: spacing.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Text variant="caption" color="muted" style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>
+              {t('lesson.fieldNote', { name: host.commonName })}
+            </Text>
+          </View>
+          <Text variant="small" style={{ marginTop: spacing.xs, lineHeight: 20 }}>
+            {fieldNote}
+          </Text>
         </Card>
       </Animated.View>
 

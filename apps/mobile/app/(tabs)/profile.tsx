@@ -198,6 +198,13 @@ export default function ProfileScreen() {
           style={{ marginTop: spacing.sm }}
         />
         <Button
+          label={t('fieldGuide.title')}
+          onPress={() => router.push('/field-guide')}
+          variant="ghost"
+          fullWidth
+          style={{ marginTop: spacing.sm }}
+        />
+        <Button
           label={t('settings.title')}
           onPress={() => router.push('/settings')}
           variant="ghost"
