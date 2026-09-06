@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -161,18 +161,26 @@ export default function AssessmentRunner() {
   }
 
   if (setupQuery.isLoading || scoring) {
-    return <Screen loading />;
+    return (
+      <>
+        <Stack.Screen options={{ title: '' }} />
+        <Screen loading />
+      </>
+    );
   }
 
   if (!setupQuery.data?.assessment || pool.length === 0) {
     return (
-      <Screen
-        empty={{
-          title: t('assessment.noneAvailable'),
-          actionLabel: t('common.back'),
-          onAction: () => router.back(),
-        }}
-      />
+      <>
+        <Stack.Screen options={{ title: '' }} />
+        <Screen
+          empty={{
+            title: t('assessment.noneAvailable'),
+            actionLabel: t('common.back'),
+            onAction: () => router.back(),
+          }}
+        />
+      </>
     );
   }
 
@@ -180,6 +188,7 @@ export default function AssessmentRunner() {
     const estimatedLevel = parseCefr(result.estimated) ?? 'A1';
     return (
       <Screen>
+        <Stack.Screen options={{ title: '' }} />
         <Text variant="title" style={{ marginTop: spacing.xl }}>
           {t('assessment.resultTitle')}
         </Text>
@@ -210,12 +219,20 @@ export default function AssessmentRunner() {
     );
   }
 
-  if (!state) return <Screen loading />;
+  if (!state) {
+    return (
+      <>
+        <Stack.Screen options={{ title: '' }} />
+        <Screen loading />
+      </>
+    );
+  }
 
   const progress = Math.min(1, state.responses.length / DEFAULT_PLACEMENT_CONFIG.minItems);
 
   return (
     <Screen>
+      <Stack.Screen options={{ title: '' }} />
       <Text variant="title">{setupQuery.data.assessment.title}</Text>
       <Text variant="caption" color="muted" style={{ marginTop: spacing.sm }}>
         {t('placement.progress', {

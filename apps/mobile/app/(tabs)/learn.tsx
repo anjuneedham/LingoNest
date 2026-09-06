@@ -242,11 +242,11 @@ function UnitRow({ unit }: { unit: UnitSummary }) {
                   borderColor:
                     lesson.status === 'completed'
                       ? theme.success
-                      : lesson.status === 'started'
+                      : lesson.status === 'in_progress'
                         ? theme.primary
                         : theme.border,
                   backgroundColor:
-                    lesson.status === 'completed' ? theme.success : lesson.status === 'started' ? theme.primaryMuted : 'transparent',
+                    lesson.status === 'completed' ? theme.success : lesson.status === 'in_progress' ? theme.primaryMuted : 'transparent',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginRight: spacing.md,
@@ -265,11 +265,11 @@ function UnitRow({ unit }: { unit: UnitSummary }) {
                 <Text
                   variant="body"
                   style={{
-                    fontWeight: lesson.status === 'started' ? '600' : '400',
+                    fontWeight: lesson.status === 'in_progress' ? '600' : '400',
                     color:
                       lesson.status === 'completed'
                         ? theme.textMuted
-                        : lesson.status === 'started'
+                        : lesson.status === 'in_progress'
                           ? theme.primary
                           : theme.text,
                   }}

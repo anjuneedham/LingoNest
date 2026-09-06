@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -104,7 +104,9 @@ export default function Bookings() {
   };
 
   return (
-    <Screen
+    <>
+      <Stack.Screen options={{ title: '' }} />
+      <Screen
       loading={bookingsQuery.isLoading}
       empty={
         !bookingsQuery.isLoading && bookings.length === 0
@@ -153,6 +155,7 @@ export default function Bookings() {
         </>
       ) : null}
     </Screen>
+    </>
   );
 }
 

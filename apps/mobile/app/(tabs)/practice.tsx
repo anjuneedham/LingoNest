@@ -48,8 +48,10 @@ export default function Practice() {
       body: t('practice.aiConversationBody'),
       route: '/practice/conversation',
       glyph: '💬',
+      badge: undefined,
       minutes: 5,
       color: PRACTICE_MODE_COLORS.conversation,
+      isPriority: false,
     },
     {
       key: 'review',
@@ -68,8 +70,10 @@ export default function Practice() {
       body: t('practice.speakingBody'),
       route: '/practice/speaking',
       glyph: '🎙',
+      badge: undefined,
       minutes: 8,
       color: PRACTICE_MODE_COLORS.speaking,
+      isPriority: false,
     },
     {
       key: 'listening',
@@ -77,8 +81,10 @@ export default function Practice() {
       body: t('practice.listeningBody'),
       route: '/practice/listening',
       glyph: '🎧',
+      badge: undefined,
       minutes: 7,
       color: PRACTICE_MODE_COLORS.listening,
+      isPriority: false,
     },
     {
       key: 'writing',
@@ -86,8 +92,10 @@ export default function Practice() {
       body: t('practice.writingBody'),
       route: '/practice/writing',
       glyph: '✎',
+      badge: undefined,
       minutes: 6,
       color: PRACTICE_MODE_COLORS.writing,
+      isPriority: false,
     },
     {
       key: 'mistakes',
@@ -97,6 +105,7 @@ export default function Practice() {
         : t('practice.mistakesBody'),
       route: '/practice/mistakes',
       glyph: '⚠',
+      badge: undefined,
       minutes: 5,
       color: PRACTICE_MODE_COLORS.mistakes,
       isPriority: Boolean(topMistake),
@@ -107,8 +116,10 @@ export default function Practice() {
       body: t('practice.quickBody'),
       route: '/practice/quick',
       glyph: '⚡',
+      badge: undefined,
       minutes: 2,
       color: PRACTICE_MODE_COLORS.quick,
+      isPriority: false,
     },
   ] as const;
 
@@ -134,7 +145,7 @@ export default function Practice() {
             style={{
               marginBottom: spacing.md,
               borderLeftWidth: 4,
-              borderLeftColor: 'color' in option ? option.color : 'transparent',
+              borderLeftColor: option.color,
             }}
             accessibilityLabel={option.title}
             accessibilityHint={option.body}
@@ -158,7 +169,7 @@ export default function Practice() {
                   <Text variant={option.isPriority ? 'bodyStrong' : 'subheading'}>
                     {option.title}
                   </Text>
-                  {option.isPriority && 'badge' in option && option.badge ? (
+                  {option.isPriority && option.badge ? (
                     <Badge label={option.badge} tone="danger" glyph="⭐" />
                   ) : null}
                 </View>

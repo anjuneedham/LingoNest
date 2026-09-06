@@ -1,5 +1,6 @@
 import React from 'react';
 import { Switch, View } from 'react-native';
+import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { IMMERSION_LEVELS } from '@lingonest/core';
 import { Card, Screen, Text } from '@/components';
@@ -93,6 +94,7 @@ export default function Settings() {
 
   return (
     <Screen>
+      <Stack.Screen options={{ title: '' }} />
       <Text variant="title">{t('settings.title')}</Text>
 
       <Card style={{ marginTop: spacing.lg }}>

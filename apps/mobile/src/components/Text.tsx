@@ -5,7 +5,7 @@ import type { TypographyVariant } from '@/theme/tokens';
 
 interface TextProps extends RNTextProps {
   readonly variant?: TypographyVariant;
-  readonly color?: 'default' | 'muted' | 'primary' | 'success' | 'danger' | 'inverse';
+  readonly color?: 'default' | 'muted' | 'primary' | 'success' | 'danger' | 'inverse' | 'streak';
   readonly align?: TextStyle['textAlign'];
   /**
    * Marks text in the language being learned, so it can be set larger, given
@@ -33,6 +33,7 @@ export function Text({
     success: theme.success,
     danger: theme.danger,
     inverse: theme.textInverse,
+    streak: theme.streak,
   } as const;
 
   return (
