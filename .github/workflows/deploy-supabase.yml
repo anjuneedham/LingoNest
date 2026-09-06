@@ -30,12 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
       - name: Push migrations
-        run: supabase db push --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.${SUPABASE_PROJECT_ID}.supabase.co:5432/postgres"
+        # Installed via npm rather than supabase/setup-cli@v1: that action
+        # resolves "latest" through GitHub's unauthenticated releases API,
+        # which is rate-limited and fails intermittently on shared runners.
+        run: npx -y supabase@latest db push --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.${SUPABASE_PROJECT_ID}.supabase.co:5432/postgres"
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
