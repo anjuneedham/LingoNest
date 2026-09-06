@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { Badge, Button, Card, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { palette } from '@/theme/tokens';
@@ -105,9 +106,12 @@ export default function Room() {
           justifyContent: 'center',
         }}
       >
-        <Text variant="body" color="inverse">
-          {t('room.joining')}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <PulsingDot />
+          <Text variant="body" color="inverse">
+            {t('room.joining')}
+          </Text>
+        </View>
         {grant ? (
           <Text variant="caption" color="inverse" style={{ marginTop: spacing.sm, opacity: 0.7 }}>
             {`${grant.provider} · ${grant.roomId}`}
@@ -156,6 +160,22 @@ export default function Room() {
         />
       </View>
     </Screen>
+  );
+}
+
+function PulsingDot() {
+  const opacity = useSharedValue(0.4);
+
+  useEffect(() => {
+    opacity.value = withRepeat(withSequence(withTiming(1, { duration: 600 }), withTiming(0.4, { duration: 600 })), -1, true);
+  }, [opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View
+      style={[{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette.success600 }, animatedStyle]}
+    />
   );
 }
 

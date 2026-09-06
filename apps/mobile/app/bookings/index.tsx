@@ -3,6 +3,7 @@ import { Alert, View } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   canJoinRoom,
   formatInZone,
@@ -10,7 +11,7 @@ import {
   type BookingStatus,
   type Currency,
 } from '@lingonest/core';
-import { Badge, Button, Card, Screen, Text } from '@/components';
+import { Badge, Button, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase } from '@/services/supabase';
 import { cancelBooking } from '@/services/marketplace';
@@ -108,6 +109,18 @@ export default function Bookings() {
       <Stack.Screen options={{ title: '' }} />
       <Screen
       loading={bookingsQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="35%" height={22} />
+          {[0, 1].map((i) => (
+            <View key={i} style={{ marginTop: spacing.md, padding: spacing.lg }}>
+              <Skeleton width="55%" height={16} />
+              <Skeleton width="70%" height={12} style={{ marginTop: spacing.xs }} />
+              <Skeleton width="30%" height={20} style={{ marginTop: spacing.sm, borderRadius: 999 }} />
+            </View>
+          ))}
+        </>
+      }
       empty={
         !bookingsQuery.isLoading && bookings.length === 0
           ? {
@@ -124,15 +137,16 @@ export default function Bookings() {
       {upcoming.length > 0 ? (
         <>
           <Text variant="heading">{t('booking.upcoming')}</Text>
-          {upcoming.map((booking) => (
-            <BookingCard
-              key={booking.id}
-              booking={booking}
-              timezone={profile?.timezone ?? 'UTC'}
-              busy={busy === booking.id}
-              onCancel={() => void confirmCancel(booking)}
-              onMessage={() => void message(booking)}
-            />
+          {upcoming.map((booking, i) => (
+            <Animated.View key={booking.id} entering={FadeInDown.delay(i * 60)}>
+              <BookingCard
+                booking={booking}
+                timezone={profile?.timezone ?? 'UTC'}
+                busy={busy === booking.id}
+                onCancel={() => void confirmCancel(booking)}
+                onMessage={() => void message(booking)}
+              />
+            </Animated.View>
           ))}
         </>
       ) : null}
@@ -142,15 +156,17 @@ export default function Bookings() {
           <Text variant="heading" style={{ marginTop: spacing.xl }}>
             {t('booking.past')}
           </Text>
-          {past.map((booking) => (
-            <BookingCard
-              key={booking.id}
-              booking={booking}
-              timezone={profile?.timezone ?? 'UTC'}
-              busy={false}
-              onCancel={() => undefined}
-              onMessage={() => void message(booking)}
-            />
+          {past.map((booking, i) => (
+            <Animated.View key={booking.id} entering={FadeInDown.delay(i * 60)}>
+              <BookingCard
+                booking={booking}
+                timezone={profile?.timezone ?? 'UTC'}
+                busy={false}
+                isPast
+                onCancel={() => undefined}
+                onMessage={() => void message(booking)}
+              />
+            </Animated.View>
           ))}
         </>
       ) : null}
@@ -174,16 +190,18 @@ function BookingCard({
   booking,
   timezone,
   busy,
+  isPast = false,
   onCancel,
   onMessage,
 }: {
   booking: BookingRow;
   timezone: string;
   busy: boolean;
+  isPast?: boolean;
   onCancel: () => void;
   onMessage: () => void;
 }) {
-  const { spacing } = useTheme();
+  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
 
   const startsAt = new Date(booking.starts_at).getTime();
@@ -195,7 +213,7 @@ function BookingCard({
   const cancellable = booking.status === 'confirmed' && startsAt > Date.now();
 
   return (
-    <Card style={{ marginTop: spacing.md }}>
+    <Card style={{ marginTop: spacing.md, borderColor: isPast ? theme.border : undefined, opacity: isPast ? 0.6 : 1 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ flex: 1 }}>
           <Text variant="subheading">{booking.profiles?.display_name ?? ''}</Text>

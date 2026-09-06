@@ -3,7 +3,8 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, TextInput, View } fr
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Button, Screen, Text } from '@/components';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Button, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import {
   blockUser,
@@ -98,6 +99,22 @@ export default function Thread() {
     <Screen
       scroll={false}
       loading={messagesQuery.isLoading}
+      skeleton={
+        <View style={{ padding: spacing.lg }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton
+              key={i}
+              width="60%"
+              height={40}
+              radius={radius.md}
+              style={{
+                alignSelf: i % 2 === 0 ? 'flex-start' : 'flex-end',
+                marginBottom: spacing.md,
+              }}
+            />
+          ))}
+        </View>
+      }
       error={messagesQuery.data && !messagesQuery.data.ok ? messagesQuery.data.error : null}
       onRetry={() => void messagesQuery.refetch()}
       padded={false}
@@ -122,8 +139,9 @@ export default function Thread() {
         {messages.map((message) => {
           const mine = message.senderId === profile?.id;
           return (
-            <View
+            <Animated.View
               key={message.id}
+              entering={FadeInDown.duration(250)}
               style={{
                 alignSelf: mine ? 'flex-end' : 'flex-start',
                 maxWidth: '80%',
@@ -134,7 +152,7 @@ export default function Thread() {
               }}
             >
               <Text variant="body">{message.redacted ? t('messages.redacted') : message.body}</Text>
-            </View>
+            </Animated.View>
           );
         })}
       </ScrollView>

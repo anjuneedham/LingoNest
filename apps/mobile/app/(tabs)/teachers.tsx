@@ -3,8 +3,9 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { TEACHER_SPECIALTIES, formatMoney, type Currency } from '@lingonest/core';
-import { Badge, Card, Screen, Text } from '@/components';
+import { Badge, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { searchTeachers, type TeacherCard, type TeacherFilters } from '@/services/marketplace';
 import { useLearningStore } from '@/store/learning';
@@ -18,7 +19,7 @@ import { track } from '@/services/analytics';
  * list — and cannot be shown for a teacher who has not been verified (§84).
  */
 export default function Teachers() {
-  const { spacing } = useTheme();
+  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const languageCode = useLearningStore((s) => s.languageCode);
   const [filters, setFilters] = useState<TeacherFilters>({});
@@ -54,6 +55,32 @@ export default function Teachers() {
   return (
     <Screen
       loading={searchQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="45%" height={22} />
+          <Skeleton width="90%" height={32} style={{ marginTop: spacing.md, borderRadius: 999 }} />
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={{
+                flexDirection: 'row',
+                marginTop: spacing.md,
+                padding: spacing.lg,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: theme.border,
+              }}
+            >
+              <Skeleton width={56} height={56} radius={28} />
+              <View style={{ flex: 1, marginLeft: spacing.md }}>
+                <Skeleton width="50%" height={16} />
+                <Skeleton width="80%" height={12} style={{ marginTop: spacing.xs }} />
+                <Skeleton width="40%" height={12} style={{ marginTop: spacing.sm }} />
+              </View>
+            </View>
+          ))}
+        </>
+      }
       error={result && !result.ok ? result.error : null}
       onRetry={() => void searchQuery.refetch()}
       empty={
@@ -63,6 +90,11 @@ export default function Teachers() {
               body: t('teachers.noResultsBody'),
               actionLabel: t('teachers.clearFilters'),
               onAction: () => setFilters({}),
+              icon: (
+                <Text variant="display" style={{ marginBottom: spacing.sm }}>
+                  🔍
+                </Text>
+              ),
             }
           : null
       }
@@ -103,8 +135,10 @@ export default function Teachers() {
         </Text>
       ) : null}
 
-      {teachers.map((teacher) => (
-        <TeacherRow key={teacher.userId} teacher={teacher} />
+      {teachers.map((teacher, i) => (
+        <Animated.View key={teacher.userId} entering={FadeInDown.delay(i * 60)}>
+          <TeacherRow teacher={teacher} />
+        </Animated.View>
       ))}
     </Screen>
   );
@@ -145,6 +179,7 @@ function FilterChip({
 function TeacherRow({ teacher }: { teacher: TeacherCard }) {
   const { theme, spacing, radius } = useTheme();
   const { t } = useTranslation();
+  const isTopRated = teacher.ratingCount >= 10 && teacher.ratingAvg >= 4.5;
 
   return (
     <Card
@@ -152,7 +187,12 @@ function TeacherRow({ teacher }: { teacher: TeacherCard }) {
         track('teacher_view', { teacherId: teacher.userId, source: 'search' });
         router.push(`/teacher/${teacher.userId}`);
       }}
-      style={{ marginTop: spacing.md }}
+      raised={isTopRated}
+      style={{
+        marginTop: spacing.md,
+        borderColor: isTopRated ? theme.primary : undefined,
+        borderWidth: isTopRated ? 2 : 1,
+      }}
       accessibilityLabel={`${teacher.displayName}, ${teacher.headline}`}
     >
       <View style={{ flexDirection: 'row' }}>
@@ -195,6 +235,7 @@ function TeacherRow({ teacher }: { teacher: TeacherCard }) {
             ) : (
               <Badge label={t('teachers.newTeacher')} glyph="✦" />
             )}
+            {isTopRated ? <Badge label={t('teachers.topRated')} tone="primary" glyph="⭐" /> : null}
             <Text variant="caption" color="muted">
               {t('teachers.lessonsTaught', { count: teacher.lessonsTaught })}
             </Text>

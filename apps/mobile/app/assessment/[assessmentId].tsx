@@ -21,6 +21,7 @@ import { supabase } from '@/services/supabase';
 import { callFunction } from '@/services/api';
 import { useSessionStore } from '@/store/session';
 import { track } from '@/services/analytics';
+import { feedbackCorrect, feedbackIncorrect } from '@/services/feedback';
 
 /**
  * A standalone assessment: the learner's voluntary "level check-up", or a
@@ -45,6 +46,7 @@ export default function AssessmentRunner() {
     confidence: number;
     itemsAnswered: number;
   } | null>(null);
+  const [pickedOptionId, setPickedOptionId] = useState<string | null>(null);
 
   const setupQuery = useQuery({
     queryKey: ['assessment-setup', assessmentId, profile?.id],
@@ -121,6 +123,17 @@ export default function AssessmentRunner() {
 
   const currentRaw = rawItems.find((raw) => raw.id === currentItem?.id);
   const activity = currentRaw?.inline_activity as InlineActivity | undefined;
+
+  function pick(optionId: string, correct: boolean) {
+    if (pickedOptionId) return; // already mid-transition to the next item
+    setPickedOptionId(optionId);
+    if (correct) feedbackCorrect();
+    else feedbackIncorrect();
+    setTimeout(() => {
+      setPickedOptionId(null);
+      void answer(correct);
+    }, 450);
+  }
 
   async function answer(correct: boolean) {
     if (!state || !currentItem) return;
@@ -250,27 +263,35 @@ export default function AssessmentRunner() {
           <Text variant="heading">{activity.prompt?.question ?? ''}</Text>
 
           <View style={{ marginTop: spacing.xl }}>
-            {(activity.prompt?.options ?? []).map((option) => (
-              <Pressable
-                key={option.id}
-                onPress={() => void answer(option.id === activity.answerHintId)}
-                accessibilityRole="radio"
-                accessibilityLabel={option.text}
-                style={{
-                  minHeight: MIN_TOUCH_TARGET + 8,
-                  justifyContent: 'center',
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  marginBottom: spacing.md,
-                  borderRadius: radius.md,
-                  borderWidth: 2,
-                  borderColor: theme.border,
-                  backgroundColor: theme.surface,
-                }}
-              >
-                <Text variant="body">{option.text}</Text>
-              </Pressable>
-            ))}
+            {(activity.prompt?.options ?? []).map((option) => {
+              const isPicked = option.id === pickedOptionId;
+              const isCorrectAnswer = option.id === activity.answerHintId;
+              const showFeedback = Boolean(pickedOptionId);
+              const tone = isPicked ? (isCorrectAnswer ? theme.success : theme.danger) : undefined;
+              return (
+                <Pressable
+                  key={option.id}
+                  onPress={() => pick(option.id, isCorrectAnswer)}
+                  disabled={showFeedback}
+                  accessibilityRole="radio"
+                  accessibilityLabel={option.text}
+                  style={{
+                    minHeight: MIN_TOUCH_TARGET + 8,
+                    justifyContent: 'center',
+                    paddingHorizontal: spacing.lg,
+                    paddingVertical: spacing.md,
+                    marginBottom: spacing.md,
+                    borderRadius: radius.md,
+                    borderWidth: 2,
+                    borderColor: tone ?? theme.border,
+                    backgroundColor: tone ? `${tone}22` : theme.surface,
+                    opacity: showFeedback && !isPicked ? 0.5 : 1,
+                  }}
+                >
+                  <Text variant="body">{option.text}</Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
       ) : (

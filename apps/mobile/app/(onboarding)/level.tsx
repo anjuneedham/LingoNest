@@ -32,10 +32,12 @@ export default function ChooseLevel() {
           <Card
             key={option}
             onPress={() => setSelected(option)}
+            raised={selected === option}
             style={{
               marginBottom: spacing.sm,
               borderWidth: 2,
               borderColor: selected === option ? theme.primary : theme.border,
+              backgroundColor: selected === option ? theme.primaryMuted : undefined,
             }}
             accessibilityLabel={t(`onboarding.level.${option}`)}
           >

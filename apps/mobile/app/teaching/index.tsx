@@ -10,7 +10,7 @@ import {
   summariseEarnings,
   type Currency,
 } from '@lingonest/core';
-import { Badge, Button, Card, Screen, Text } from '@/components';
+import { Badge, Button, Card, Screen, Skeleton, SkeletonCard, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase } from '@/services/supabase';
 import { useSessionStore } from '@/store/session';
@@ -99,13 +99,20 @@ export default function TeacherDashboard() {
   return (
     <Screen
       loading={dashboardQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="50%" height={22} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+          <SkeletonCard lines={3} style={{ marginTop: spacing.md }} />
+        </>
+      }
       onRefresh={() => void dashboardQuery.refetch()}
       refreshing={dashboardQuery.isRefetching}
     >
       <Text variant="title">{t('teaching.dashboard')}</Text>
 
       {teacher && !teacher.payout_enabled ? (
-        <Card style={{ marginTop: spacing.lg, borderColor: theme.warning, borderWidth: 2 }}>
+        <Card raised style={{ marginTop: spacing.lg, borderColor: theme.warning, borderWidth: 2 }}>
           <Badge label={t('teaching.payoutSetup')} tone="warning" glyph="!" />
           <Text variant="body" style={{ marginTop: spacing.sm }}>
             {t('teaching.payoutRequired')}

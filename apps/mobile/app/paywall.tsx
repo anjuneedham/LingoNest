@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown, useSharedValue, withSpring } from 'react-native-reanimated';
 import { annualSavingBps, formatMoney, planPrice, type BillingInterval, type Currency, type Plan } from '@lingonest/core';
-import { Badge, Button, Card, Screen, Text } from '@/components';
+import { Badge, Button, Card, Screen, Skeleton, SkeletonCard, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase } from '@/services/supabase';
 import { callFunction } from '@/services/api';
 import { track } from '@/services/analytics';
+import { feedbackTap } from '@/services/feedback';
 
 /**
  * The paywall.
@@ -18,7 +20,7 @@ import { track } from '@/services/analytics';
  * server enforces, so the list cannot drift from what is actually granted.
  */
 export default function Paywall() {
-  const { theme, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const [interval, setInterval] = useState<BillingInterval>('year');
   const [busy, setBusy] = useState<string | null>(null);
@@ -64,7 +66,18 @@ export default function Paywall() {
   };
 
   return (
-    <Screen loading={plansQuery.isLoading}>
+    <Screen
+      loading={plansQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="60%" height={22} />
+          <Skeleton width="90%" height={13} style={{ marginTop: spacing.xs }} />
+          <Skeleton width="50%" height={32} style={{ marginTop: spacing.lg, borderRadius: 999 }} />
+          <SkeletonCard lines={3} style={{ marginTop: spacing.lg }} />
+          <SkeletonCard lines={3} style={{ marginTop: spacing.md }} />
+        </>
+      }
+    >
       <Text variant="title">{t('paywall.title')}</Text>
       <Text variant="body" color="muted" style={{ marginTop: spacing.xs }}>
         {t('paywall.subtitle')}
@@ -72,28 +85,19 @@ export default function Paywall() {
 
       <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
         {(['month', 'year'] as const).map((option) => (
-          <Text
+          <IntervalOption
             key={option}
-            onPress={() => setInterval(option)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: interval === option }}
-            variant="small"
-            color={interval === option ? 'primary' : 'muted'}
-            style={{
-              paddingHorizontal: spacing.lg,
-              paddingVertical: spacing.sm,
-              borderRadius: 999,
-              borderWidth: 1,
-              borderColor: interval === option ? theme.primary : theme.border,
-              overflow: 'hidden',
+            label={t(`paywall.${option === 'month' ? 'monthly' : 'yearly'}`)}
+            selected={interval === option}
+            onPress={() => {
+              feedbackTap();
+              setInterval(option);
             }}
-          >
-            {t(`paywall.${option === 'month' ? 'monthly' : 'yearly'}`)}
-          </Text>
+          />
         ))}
       </View>
 
-      {plans.map((row) => {
+      {plans.map((row, i) => {
         const plan: Plan = {
           code: row.code as never,
           nameKey: row.name_key,
@@ -106,7 +110,8 @@ export default function Paywall() {
         const saving = annualSavingBps(plan, currency);
 
         return (
-          <Card key={row.code} style={{ marginTop: spacing.lg }}>
+          <Animated.View key={row.code} entering={FadeInDown.delay(i * 80)}>
+          <Card style={{ marginTop: spacing.lg }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text variant="heading">{t(row.name_key)}</Text>
               {interval === 'year' && saving > 0 ? (
@@ -149,6 +154,7 @@ export default function Paywall() {
               style={{ marginTop: spacing.lg }}
             />
           </Card>
+          </Animated.View>
         );
       })}
 
@@ -162,6 +168,47 @@ export default function Paywall() {
         {t('paywall.terms')}
       </Text>
     </Screen>
+  );
+}
+
+function IntervalOption({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  const { theme, spacing } = useTheme();
+  const scale = useSharedValue(1);
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => {
+          scale.value = withSpring(0.96, { damping: 10, mass: 1 });
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, { damping: 10, mass: 1 });
+        }}
+        accessibilityRole="button"
+        accessibilityState={{ selected }}
+        style={{
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.sm,
+          borderRadius: 999,
+          borderWidth: 1,
+          borderColor: selected ? theme.primary : theme.border,
+          backgroundColor: selected ? theme.primaryMuted : undefined,
+        }}
+      >
+        <Text variant="small" color={selected ? 'primary' : 'muted'}>
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 

@@ -5,19 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Badge, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
+import { PRACTICE_MODE_COLORS } from '@/theme/practiceModes';
 import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
 import { useLearningStore } from '@/store/learning';
-
-const PRACTICE_MODE_COLORS = {
-  conversation: '#8B5CF6',
-  review: '#EC4899',
-  speaking: '#F59E0B',
-  listening: '#06B6D4',
-  writing: '#3B82F6',
-  mistakes: '#EF4444',
-  quick: '#10B981',
-} as const;
 
 /**
  * Practice.

@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { SKILLS, suggestTeacherFocus, type Cefr, type MistakeSignal, type Skill } from '@lingonest/core';
-import { Badge, Button, Card, LevelPill, Screen, SkillRadar, Text } from '@/components';
+import { Badge, Button, Card, LevelPill, Screen, Skeleton, SkeletonCard, SkillRadar, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase } from '@/services/supabase';
 import { useSessionStore } from '@/store/session';
@@ -101,6 +101,13 @@ export default function StudentDetail() {
   return (
     <Screen
       loading={snapshotQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="55%" height={22} />
+          <Skeleton width={200} height={200} radius={100} style={{ alignSelf: 'center', marginTop: spacing.xl }} />
+          <SkeletonCard lines={3} style={{ marginTop: spacing.xl }} />
+        </>
+      }
       empty={
         snapshotQuery.isError
           ? { title: t('error.forbidden'), body: t('error.forbidden') }

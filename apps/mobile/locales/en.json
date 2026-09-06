@@ -448,6 +448,7 @@
   "lessonsTaught": "{{count}} lessons taught",
   "rating": "{{rating}} ({{count}} reviews)",
   "newTeacher": "New teacher",
+  "topRated": "Top rated",
   "nextAvailable": "Next available {{when}}",
   "bookLesson": "Book a lesson",
   "sendMessage": "Message",
