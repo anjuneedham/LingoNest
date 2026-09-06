@@ -1,0 +1,21 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.224.0/",
+    "zod": "https://esm.sh/zod@3.23.8",
+    "supabase": "https://esm.sh/@supabase/supabase-js@2.45.4",
+    "stripe": "https://esm.sh/stripe@16.12.0?target=deno"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.window", "esnext"]
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "lineWidth": 110,
+    "singleQuote": true
+  }
+}

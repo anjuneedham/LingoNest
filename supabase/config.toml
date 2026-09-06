@@ -1,0 +1,94 @@
+# Supabase project configuration.
+# `supabase start` reads this for the local stack; `supabase link` + `db push`
+# applies the same settings to a hosted project.
+
+project_id = "lingonest"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 16
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "lingonest://"
+additional_redirect_urls = ["lingonest://", "http://localhost:8081"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+
+[auth.external.apple]
+enabled = false
+client_id = ""
+secret = ""
+
+[auth.external.google]
+enabled = false
+client_id = ""
+secret = ""
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+# --- Edge Functions --------------------------------------------------------
+# Stripe signs its webhooks; it does not carry a user JWT, so that one function
+# verifies the signature instead. Every other function requires a valid token.
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.ai-conversation]
+verify_jwt = true
+
+[functions.ai-evaluate]
+verify_jwt = true
+
+[functions.ai-coach]
+verify_jwt = true
+
+[functions.ai-content-assistant]
+verify_jwt = true
+
+[functions.booking-create]
+verify_jwt = true
+
+[functions.booking-cancel]
+verify_jwt = true
+
+[functions.refund-process]
+verify_jwt = true
+
+[functions.stripe-checkout]
+verify_jwt = true
+
+[functions.stripe-connect]
+verify_jwt = true
+
+[functions.video-room]
+verify_jwt = true
+
+[functions.placement-score]
+verify_jwt = true
+
+[functions.analytics-ingest]
+verify_jwt = true
+
+# Invoked on a schedule with the service role key rather than a user token.
+[functions.payouts-run]
+verify_jwt = false
