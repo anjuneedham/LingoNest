@@ -6,6 +6,7 @@ import { Text } from './Text';
 import { useTheme } from '@/theme/ThemeProvider';
 import { MIN_TOUCH_TARGET } from '@/theme/tokens';
 import { useSettingsStore } from '@/store/settings';
+import { unlockWebAudio } from '@/services/feedback';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 type Size = 'small' | 'medium' | 'large';
@@ -61,6 +62,7 @@ export function Button({
   const heights: Record<Size, number> = { small: MIN_TOUCH_TARGET, medium: 52, large: 58 };
 
   const handlePress = () => {
+    unlockWebAudio();
     if (hapticsEnabled) {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }

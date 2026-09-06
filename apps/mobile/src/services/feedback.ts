@@ -45,6 +45,33 @@ function playerFor(name: ClipName): AudioPlayer {
   return player;
 }
 
+let webAudioUnlocked = false;
+
+/**
+ * Browsers reject `HTMLMediaElement.play()` unless it runs synchronously
+ * inside a real user gesture — every sound here fires later, from a
+ * `useEffect` after an async verdict check, so without this every play()
+ * call would fail silently (the rejection happens inside expo-audio's web
+ * player, a layer below anything this module can catch). Playing-and-
+ * immediately-pausing each cached player once, directly inside a genuine
+ * tap handler, unlocks those same elements for programmatic playback for
+ * the rest of the session — call this from the earliest reliable tap.
+ */
+export function unlockWebAudio(): void {
+  if (webAudioUnlocked || Platform.OS !== 'web') return;
+  webAudioUnlocked = true;
+  for (const name of Object.keys(clips) as ClipName[]) {
+    try {
+      const player = playerFor(name);
+      player.play();
+      player.pause();
+    } catch {
+      // Best-effort priming — a failure here just means the first real
+      // chime might also be silent, not that anything is broken.
+    }
+  }
+}
+
 async function playClip(name: ClipName): Promise<void> {
   if (!useSettingsStore.getState().soundEffectsEnabled) return;
   try {
@@ -75,6 +102,7 @@ function haptic(kind: 'light' | 'success' | 'warning'): void {
 
 /** A card or other non-Button pressable was tapped — Button handles its own. */
 export function feedbackTap(): void {
+  unlockWebAudio();
   haptic('light');
 }
 

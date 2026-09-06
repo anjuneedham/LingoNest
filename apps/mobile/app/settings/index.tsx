@@ -1,9 +1,9 @@
 import React from 'react';
 import { Switch, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { IMMERSION_LEVELS } from '@lingonest/core';
-import { Card, Screen, Text } from '@/components';
+import { Button, Card, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { textScales, type TextScale } from '@/theme/tokens';
 import { useSettingsStore, type Appearance } from '@/store/settings';
@@ -96,6 +96,22 @@ export default function Settings() {
     <Screen>
       <Stack.Screen options={{ title: '' }} />
       <Text variant="title">{t('settings.title')}</Text>
+
+      <Card style={{ marginTop: spacing.lg }}>
+        <Text variant="caption" color="muted">
+          {t('settings.languages')}
+        </Text>
+        <Text variant="small" color="muted" style={{ marginTop: spacing.xs }}>
+          {t('settings.languagesBody')}
+        </Text>
+        <Button
+          label={t('languages.title')}
+          onPress={() => router.push('/languages')}
+          variant="secondary"
+          fullWidth
+          style={{ marginTop: spacing.md }}
+        />
+      </Card>
 
       <Card style={{ marginTop: spacing.lg }}>
         <Text variant="caption" color="muted">
