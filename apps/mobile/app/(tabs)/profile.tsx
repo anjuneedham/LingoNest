@@ -21,8 +21,10 @@ export default function ProfileScreen() {
   const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
+  const roles = useSessionStore((s) => s.roles);
   const signOut = useSessionStore((s) => s.signOut);
   const languageCode = useLearningStore((s) => s.languageCode);
+  const canAdminister = roles.some((role) => role === 'admin' || role === 'content_editor' || role === 'moderator');
 
   const snapshotQuery = useQuery({
     queryKey: ['home', profile?.id, languageCode],
@@ -83,6 +85,17 @@ export default function ProfileScreen() {
             </View>
           </Card>
         </>
+      ) : null}
+
+      {canAdminister ? (
+        <Card style={{ marginTop: spacing.lg }}>
+          <Button
+            label={t('admin.title')}
+            onPress={() => router.push('/(admin)')}
+            variant="secondary"
+            fullWidth
+          />
+        </Card>
       ) : null}
 
       <Card style={{ marginTop: spacing.lg }}>
