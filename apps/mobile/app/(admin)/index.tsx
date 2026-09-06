@@ -16,7 +16,7 @@ import { useSessionStore } from '@/store/session';
  * that isn't wired up yet (brief §94).
  */
 export default function AdminDashboard() {
-  const { theme, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const roles = useSessionStore((s) => s.roles);
   const isAdmin = roles.includes('admin');

@@ -13,7 +13,7 @@ import { useTheme } from '@/theme/ThemeProvider';
  * "review this" means something specific.
  */
 export default function LessonSummary() {
-  const { lessonId, accuracy, durationMs } = useLocalSearchParams<{
+  const { accuracy, durationMs } = useLocalSearchParams<{
     lessonId: string;
     accuracy?: string;
     durationMs?: string;

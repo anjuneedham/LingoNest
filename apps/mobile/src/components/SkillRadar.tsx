@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
-import { SKILLS, cefrOrdinal, type Cefr, type Skill } from '@lingonest/core';
+import { cefrOrdinal, type Cefr, type Skill } from '@lingonest/core';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Text } from './Text';
 

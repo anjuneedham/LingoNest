@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { mediaRefSchema } from './types';
 
 /**
  * Prompt and answer shapes for each activity type. The CMS generates its editor

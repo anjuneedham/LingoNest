@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { cefrDisplay, parseCefr } from '@lingonest/core';

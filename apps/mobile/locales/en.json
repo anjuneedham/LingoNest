@@ -502,7 +502,7 @@
   "joining": "Connecting…",
   "waitingForTeacher": "Waiting for {{teacher}} to join",
   "waitingForLearner": "Waiting for {{learner}} to join",
-  "notes": "Shared notes",
+  "notes": "My notes",
   "chat": "Chat",
   "timeRemaining": "{{minutes}} min left",
   "endLesson": "End lesson",
@@ -511,7 +511,8 @@
   "micOff": "Unmute",
   "cameraOn": "Turn camera off",
   "cameraOff": "Turn camera on",
-  "notConfigured": "Video isn't set up in this build. You can still use chat and notes with your teacher."
+  "notConfigured": "Video isn't set up in this build. You can still use chat and notes with your teacher.",
+  "notesPlaceholder": "Jot down anything worth remembering from this lesson"
  },
  "teaching": {
   "title": "Teaching",

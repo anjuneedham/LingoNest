@@ -18,7 +18,7 @@ import { track } from '@/services/analytics';
  * list — and cannot be shown for a teacher who has not been verified (§84).
  */
 export default function Teachers() {
-  const { theme, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const languageCode = useLearningStore((s) => s.languageCode);
   const [filters, setFilters] = useState<TeacherFilters>({});

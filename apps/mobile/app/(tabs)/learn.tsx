@@ -24,7 +24,6 @@ import { useLearningStore } from '@/store/learning';
  * the learner is told matches what actually gates progression.
  */
 export default function Learn() {
-  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);

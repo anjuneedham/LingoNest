@@ -10,14 +10,18 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspace @lingonest/core --workspace @lingonest/content",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint .",
     "content:build": "npm run build --workspace @lingonest/content",
     "content:validate": "npm run validate --workspace @lingonest/content",
     "db:seed": "node scripts/seed-content.mjs",
     "mobile": "npm run start --workspace @lingonest/mobile"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0",
     "typescript": "~5.9.2",
+    "typescript-eslint": "^8.69.0",
     "vitest": "^3.2.4"
   },
   "engines": {

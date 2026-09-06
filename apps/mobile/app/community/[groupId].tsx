@@ -18,7 +18,7 @@ import { useSessionStore } from '@/store/session';
  */
 export default function CommunityGroup() {
   const { groupId } = useLocalSearchParams<{ groupId: string }>();
-  const { theme, spacing, radius, type } = useTheme();
+  const { theme, spacing, type } = useTheme();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const profile = useSessionStore((s) => s.profile);

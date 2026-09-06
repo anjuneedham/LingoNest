@@ -178,7 +178,10 @@ function gradeMultipleAnswer(activity: Activity, chosen: string[]): Verdict {
   const picked = new Set(chosen);
   let hits = 0;
   let falsePositives = 0;
-  for (const id of picked) (expected.has(id) ? hits++ : falsePositives++);
+  for (const id of picked) {
+    if (expected.has(id)) hits++;
+    else falsePositives++;
+  }
   const missed = expected.size - hits;
 
   const prompt = promptSchemas.multiple_answer.safeParse(activity.prompt);

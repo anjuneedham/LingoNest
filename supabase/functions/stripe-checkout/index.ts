@@ -1,7 +1,7 @@
 import { z } from 'https://esm.sh/zod@3.23.8';
 import { authenticate } from '../_shared/auth.ts';
 import { fail, json, parseBody, preflight, rateLimit } from '../_shared/http.ts';
-import { config, isPaymentsConfigured } from '../_shared/env.ts';
+import { isPaymentsConfigured } from '../_shared/env.ts';
 import { idempotencyKey, stripe } from '../_shared/stripe.ts';
 
 /**

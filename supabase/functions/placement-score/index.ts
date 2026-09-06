@@ -41,7 +41,6 @@ const bodySchema = z.object({
 });
 
 const LADDER = ['PRE_A1', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
-type Cefr = (typeof LADDER)[number] | 'A2_PLUS' | 'B1_PLUS' | 'B2_PLUS';
 
 const PASS_THRESHOLD = 0.65;
 const MIN_ITEMS = 12;

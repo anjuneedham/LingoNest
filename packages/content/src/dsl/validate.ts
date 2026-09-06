@@ -1,6 +1,5 @@
 import {
   ACTIVITY_REGISTRY,
-  answerSchemaFor,
   cefrDistance,
   promptSchemaFor,
   type ActivityType,

@@ -15,7 +15,6 @@ import type { ActivityRendererProps } from '../types';
  */
 export function TimedChallengeActivity({
   activity,
-  languageCode,
   onAnswerChange,
   onSubmit,
   disabled,

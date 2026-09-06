@@ -18,7 +18,7 @@ import { useLearningStore } from '@/store/learning';
  * to answer "where am I, what next, how am I doing" without scrolling (§96).
  */
 export default function Home() {
-  const { theme, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);

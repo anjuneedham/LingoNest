@@ -17,7 +17,7 @@ import { useLearningStore } from '@/store/learning';
  * makes the mistake tracking worth collecting.
  */
 export default function MistakeReview() {
-  const { theme, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);

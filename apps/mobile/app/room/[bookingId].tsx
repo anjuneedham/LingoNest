@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Badge, Button, Card, Screen, Text } from '@/components';
@@ -17,7 +17,7 @@ import { callFunction } from '@/services/api';
  */
 export default function Room() {
   const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
-  const { theme, spacing, radius } = useTheme();
+  const { theme, spacing, radius, type } = useTheme();
   const { t } = useTranslation();
 
   const [grant, setGrant] = useState<RoomGrant | null>(null);
@@ -126,19 +126,26 @@ export default function Room() {
         <Text variant="caption" color="muted">
           {t('room.notes')}
         </Text>
-        <View
-          style={{
-            minHeight: 60,
-            marginTop: spacing.sm,
-            padding: spacing.md,
-            borderRadius: radius.md,
-            backgroundColor: theme.background,
-          }}
-        >
-          <Text variant="small" color="muted">
-            {notes || t('room.notes')}
-          </Text>
-        </View>
+        <TextInput
+          value={notes}
+          onChangeText={setNotes}
+          placeholder={t('room.notesPlaceholder')}
+          placeholderTextColor={theme.textMuted}
+          multiline
+          accessibilityLabel={t('room.notes')}
+          style={[
+            type('small'),
+            {
+              minHeight: 60,
+              marginTop: spacing.sm,
+              padding: spacing.md,
+              borderRadius: radius.md,
+              backgroundColor: theme.background,
+              color: theme.text,
+              textAlignVertical: 'top',
+            },
+          ]}
+        />
 
         <Button
           label={t('room.endLesson')}

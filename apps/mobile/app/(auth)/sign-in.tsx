@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BRAND } from '@lingonest/core';
 import { Button, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase, isBackendConfigured } from '@/services/supabase';
-import { track } from '@/services/analytics';
 
 export default function SignIn() {
   const { theme, spacing, radius, type } = useTheme();

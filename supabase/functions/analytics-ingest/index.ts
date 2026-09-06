@@ -37,6 +37,8 @@ const KNOWN_EVENTS = new Set([
   'placement_started',
   'placement_completed',
   'placement_skipped',
+  'assessment_started',
+  'assessment_completed',
   'lesson_started',
   'lesson_completed',
   'lesson_abandoned',

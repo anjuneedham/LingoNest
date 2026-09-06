@@ -25,7 +25,7 @@ import { track } from '@/services/analytics';
  * server applies, so the number on the confirmation is the number that happens.
  */
 export default function Bookings() {
-  const { theme, spacing } = useTheme();
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const queryClient = useQueryClient();
