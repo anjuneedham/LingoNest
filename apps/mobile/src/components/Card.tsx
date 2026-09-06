@@ -1,7 +1,9 @@
 import React from 'react';
 import { Pressable, View, type ViewStyle } from 'react-native';
+import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/theme/ThemeProvider';
 import { elevation } from '@/theme/tokens';
+import { feedbackTap } from '@/services/feedback';
 
 interface CardProps {
   readonly children: React.ReactNode;
@@ -25,6 +27,7 @@ export function Card({
   testID,
 }: CardProps) {
   const { theme, spacing, radius } = useTheme();
+  const scale = useSharedValue(1);
 
   const base: ViewStyle = {
     backgroundColor: theme.surface,
@@ -43,16 +46,33 @@ export function Card({
     );
   }
 
+  const handlePressIn = () => {
+    scale.value = withSpring(0.98, { damping: 10, mass: 1 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 10, mass: 1 });
+  };
+
+  const handlePress = () => {
+    feedbackTap();
+    onPress();
+  };
+
   return (
-    <Pressable
-      onPress={onPress}
-      testID={testID}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityHint={accessibilityHint}
-      style={({ pressed }) => [base, { opacity: pressed ? 0.9 : 1 }, style]}
-    >
-      {children}
-    </Pressable>
+    <Animated.View style={[{ transform: [{ scale }] }, style]}>
+      <Pressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        testID={testID}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
+        style={base}
+      >
+        {children}
+      </Pressable>
+    </Animated.View>
   );
 }

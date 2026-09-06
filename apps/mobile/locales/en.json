@@ -256,6 +256,10 @@
   "watchAccents": "That's right — but watch the accents.",
   "typo": "So close — check your spelling.",
   "summaryTitle": "Lesson complete",
+  "perfect": "Perfect!",
+  "great": "Great work!",
+  "keepGoing": "Keep going!",
+  "fieldNote": "From {{name}}'s field notes",
   "accuracy": "Accuracy",
   "timeSpent": "Time",
   "xpEarned": "{{count}} XP",
@@ -803,5 +807,15 @@
   "resultTitle": "Here is your updated estimate",
   "done": "Done",
   "noneAvailable": "No check-up is available for this language yet."
+ },
+ "fieldGuide": {
+  "title": "Field Guide",
+  "subtitle": "The wildlife of the languages you're learning.",
+  "naturalHistory": "Natural history",
+  "legend": "Legend",
+  "legendCaveat": "Presented as folklore, not verified history.",
+  "locked": "Not yet met",
+  "lockedBody": "Complete your first lesson in {{language}} to meet this species.",
+  "meetSpecies": "Meet the {{name}}"
  }
 }

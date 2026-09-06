@@ -3,6 +3,7 @@ import { Stack, Redirect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useSessionStore } from '@/store/session';
+import { useStackAnimation } from '@/hooks/useStackAnimation';
 
 /**
  * The admin/CMS area.
@@ -17,6 +18,7 @@ export default function AdminLayout() {
   const { t } = useTranslation();
   const roles = useSessionStore((s) => s.roles);
   const initialising = useSessionStore((s) => s.initialising);
+  const animation = useStackAnimation();
 
   if (initialising) return null;
 
@@ -33,6 +35,7 @@ export default function AdminLayout() {
         headerTintColor: theme.text,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: theme.background },
+        animation,
       }}
     >
       <Stack.Screen name="index" options={{ title: t('admin.title') }} />

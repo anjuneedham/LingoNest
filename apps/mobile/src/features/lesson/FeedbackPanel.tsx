@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { Verdict } from '@lingonest/core';
 import { Button, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
+import { feedbackCorrect, feedbackIncorrect } from '@/services/feedback';
 
 /**
  * The correction panel.
@@ -33,6 +34,17 @@ export function FeedbackPanel({
   const unscored = verdict.notes.includes('unscored_ai_unavailable');
   const accentOnly = verdict.notes.includes('accent') && verdict.correct;
   const nearMiss = verdict.notes.includes('near_miss');
+
+  // This panel only mounts when a fresh verdict arrives (the parent swaps it
+  // in for the check button), so a mount-only effect fires exactly once per
+  // answer rather than needing to key off verdict identity.
+  useEffect(() => {
+    if (verdict.correct) {
+      feedbackCorrect();
+    } else {
+      feedbackIncorrect();
+    }
+  }, []);
 
   const headline = unscored
     ? t('error.ai_unavailable')

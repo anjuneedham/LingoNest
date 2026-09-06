@@ -144,6 +144,10 @@ export default function LessonPlayer() {
     activity?.type === 'flashcard' ||
     activity?.type === 'dialogue_completion';
 
+  const estimatedTimePerActivity = 45; // seconds
+  const estimatedRemainingSeconds = (lesson.activities.length - player.index - 1) * estimatedTimePerActivity;
+  const estimatedRemainingMinutes = Math.ceil(estimatedRemainingSeconds / 60);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['top']}>
       <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.md }}>
@@ -157,14 +161,21 @@ export default function LessonPlayer() {
           </Text>
         </View>
 
-        <Text variant="caption" color="muted">
-          {`${lesson.unitTitle} · ${lesson.title}`}
-        </Text>
-        {activity ? (
-          <Text variant="caption" color="primary">
-            {t(`lesson.stage.${activity.stage}`)}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <View style={{ flex: 1 }}>
+            <Text variant="caption" color="muted">
+              {`${lesson.unitTitle} · ${lesson.title}`}
+            </Text>
+            {activity ? (
+              <Text variant="caption" color="primary" style={{ marginTop: spacing.xs, fontWeight: '600' }}>
+                {t(`lesson.stage.${activity.stage}`)}
+              </Text>
+            ) : null}
+          </View>
+          <Text variant="caption" color="muted" style={{ textAlign: 'right' }}>
+            {estimatedRemainingMinutes > 0 ? `~${estimatedRemainingMinutes}m left` : 'Almost done!'}
           </Text>
-        ) : null}
+        </View>
       </View>
 
       <ScrollView

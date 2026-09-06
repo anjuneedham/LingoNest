@@ -1,14 +1,17 @@
 import React, { useMemo } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { formatInZone, hoursUntil, type Recommendation } from '@lingonest/core';
-import { Badge, Button, Card, LevelPill, ProgressBar, Screen, Text } from '@/components';
+import { Badge, Button, Card, LevelPill, ProgressBar, Screen, Skeleton, SkeletonCard, Text } from '@/components';
+import { CreatureIllustration } from '@/components/creatures';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
 import { useLearningStore } from '@/store/learning';
+import { getSpecies } from '@/data/species';
+import { useSpeciesUnlocks, speciesIdForLanguage } from '@/hooks/useSpeciesUnlocks';
 
 /**
  * Home.
@@ -18,10 +21,21 @@ import { useLearningStore } from '@/store/learning';
  * to answer "where am I, what next, how am I doing" without scrolling (§96).
  */
 export default function Home() {
-  const { spacing } = useTheme();
+  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);
+  const { unlocked } = useSpeciesUnlocks();
+
+  const companion = useMemo(() => {
+    const forLanguage = languageCode ? speciesIdForLanguage(languageCode) : null;
+    const id = forLanguage && unlocked[forLanguage] ? forLanguage : 'doctor-bird';
+    return getSpecies(id);
+  }, [languageCode, unlocked]);
+  const companionFact = useMemo(
+    () => companion.naturalHistory[Math.floor(Math.random() * companion.naturalHistory.length)],
+    [companion],
+  );
 
   const snapshotQuery = useQuery({
     queryKey: ['home', profile?.id, languageCode],
@@ -60,6 +74,16 @@ export default function Home() {
   return (
     <Screen
       loading={snapshotQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="40%" height={13} />
+          <Skeleton width="55%" height={28} style={{ marginTop: spacing.sm }} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+          <Skeleton width="35%" height={20} style={{ marginTop: spacing.xl, marginBottom: spacing.lg }} />
+          <SkeletonCard lines={2} style={{ marginBottom: spacing.md }} />
+          <SkeletonCard lines={2} style={{ marginBottom: spacing.md }} />
+        </>
+      }
       error={result && !result.ok ? result.error : null}
       onRetry={() => void snapshotQuery.refetch()}
       onRefresh={() => void snapshotQuery.refetch()}
@@ -67,14 +91,54 @@ export default function Home() {
     >
       {snapshot ? (
         <>
-          <Text variant="small" color="muted">
-            {greeting}
-          </Text>
-          <Text variant="title">{profile?.displayName ?? ''}</Text>
+          <View style={{ marginBottom: spacing.sm }}>
+            <Text variant="small" color="muted">
+              {greeting}
+            </Text>
+            <Text variant="title" style={{ marginTop: spacing.xs }}>
+              {profile?.displayName ?? ''}
+            </Text>
+          </View>
+
+          <Pressable
+            onPress={() => router.push('/field-guide')}
+            accessibilityRole="button"
+            accessibilityLabel={companion.commonName}
+            accessibilityHint={companionFact}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: spacing.sm,
+              padding: spacing.sm,
+              borderRadius: 16,
+              backgroundColor: theme.surfaceMuted,
+            }}
+          >
+            <View
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 26,
+                backgroundColor: theme.surface,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CreatureIllustration id={companion.id} size={40} />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text variant="caption" color="muted">
+                {companion.commonName}
+              </Text>
+              <Text variant="small" numberOfLines={2}>
+                {companionFact}
+              </Text>
+            </View>
+          </Pressable>
 
           {/* Where am I */}
-          <Card style={{ marginTop: spacing.lg }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Card style={{ marginTop: spacing.lg, borderColor: snapshot.goal.met ? '#16A34A' : undefined }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
               <View>
                 <Text variant="caption" color="muted">
                   {snapshot.languageName}
@@ -87,7 +151,7 @@ export default function Home() {
                 <Badge
                   label={t('home.streakDays', { count: snapshot.streak.current })}
                   tone="streak"
-                  glyph="▲"
+                  glyph="🔥"
                 />
               ) : null}
             </View>
@@ -95,16 +159,17 @@ export default function Home() {
             <ProgressBar
               value={goalProgress}
               label={t('home.todaysGoal')}
-              style={{ marginTop: spacing.lg }}
             />
-            <Text variant="caption" color={snapshot.goal.met ? 'success' : 'muted'} style={{ marginTop: spacing.xs }}>
-              {snapshot.goal.met
-                ? t('home.goalMet')
-                : t('home.goalProgress', {
-                    done: snapshot.goal.minutesDone,
-                    target: snapshot.goal.targetMinutes,
-                  })}
-            </Text>
+            <View style={{ marginTop: spacing.md }}>
+              <Text variant="caption" color={snapshot.goal.met ? 'success' : 'muted'} style={{ fontWeight: '600' }}>
+                {snapshot.goal.met
+                  ? '✅ ' + t('home.goalMet')
+                  : t('home.goalProgress', {
+                      done: snapshot.goal.minutesDone,
+                      target: snapshot.goal.targetMinutes,
+                    })}
+              </Text>
+            </View>
           </Card>
 
           {/* Next tutor lesson, if one is coming */}
@@ -133,33 +198,53 @@ export default function Home() {
           ) : null}
 
           {/* What next, and why */}
-          <Text variant="heading" style={{ marginTop: spacing.xl, marginBottom: spacing.md }}>
+          <Text variant="heading" style={{ marginTop: spacing.xl, marginBottom: spacing.lg }}>
             {t('lesson.nextStep')}
           </Text>
 
-          {snapshot.recommendations.slice(0, 5).map((recommendation) => (
-            <RecommendationCard key={recommendation.id} recommendation={recommendation} />
-          ))}
-
-          {snapshot.recommendations.length === 0 ? (
+          {snapshot.recommendations.length > 0 ? (
+            snapshot.recommendations.slice(0, 5).map((recommendation, idx) => (
+              <RecommendationCard
+                key={recommendation.id}
+                recommendation={recommendation}
+                isFirst={idx === 0}
+              />
+            ))
+          ) : (
             <Card>
-              <Text variant="body">{t('practice.noneDue')}</Text>
+              <View style={{ alignItems: 'center', paddingVertical: spacing.lg }}>
+                <Text variant="heading" color="muted">
+                  ✨
+                </Text>
+                <Text variant="body" style={{ marginTop: spacing.md }}>
+                  {t('practice.noneDue')}
+                </Text>
+                <Text variant="small" color="muted" style={{ marginTop: spacing.xs, textAlign: 'center' }}>
+                  {t('common.exploreLearning') || 'Explore more content to continue learning'}
+                </Text>
+              </View>
               <Button
                 label={t('learn.title')}
                 onPress={() => router.push('/(tabs)/learn')}
-                variant="secondary"
+                fullWidth
                 style={{ marginTop: spacing.md }}
               />
             </Card>
-          ) : null}
+          )}
         </>
       ) : null}
     </Screen>
   );
 }
 
-function RecommendationCard({ recommendation }: { recommendation: Recommendation }) {
-  const { spacing } = useTheme();
+function RecommendationCard({
+  recommendation,
+  isFirst = false,
+}: {
+  recommendation: Recommendation;
+  isFirst?: boolean;
+}) {
+  const { spacing, theme } = useTheme();
   const { t } = useTranslation();
 
   const go = () => {
@@ -191,10 +276,26 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
   };
 
   return (
-    <Card onPress={go} style={{ marginBottom: spacing.md }} accessibilityLabel={t(recommendation.titleKey, recommendation.titleParams)}>
+    <Card
+      onPress={go}
+      raised={isFirst}
+      style={{
+        marginBottom: spacing.md,
+        borderColor: isFirst ? theme.primary : undefined,
+        borderWidth: isFirst ? 2 : 1,
+      }}
+      accessibilityLabel={t(recommendation.titleKey, recommendation.titleParams)}
+    >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ flex: 1, marginRight: spacing.md }}>
-          <Text variant="subheading">{t(recommendation.titleKey, recommendation.titleParams)}</Text>
+          {isFirst ? (
+            <Text variant="caption" color="primary" style={{ fontWeight: '600', marginBottom: spacing.xs }}>
+              ★ {t('lesson.nextStep')}
+            </Text>
+          ) : null}
+          <Text variant={isFirst ? 'title' : 'subheading'}>
+            {t(recommendation.titleKey, recommendation.titleParams)}
+          </Text>
           {/* The reason is the point: never a card that just says "practise". */}
           <Text variant="small" color="muted" style={{ marginTop: spacing.xs }}>
             {t(recommendation.reasonKey, recommendation.reasonParams)}

@@ -1,9 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown, BounceIn } from 'react-native-reanimated';
 import { Badge, Button, Card, ProgressBar, Screen, Text } from '@/components';
+import { CreatureIllustration } from '@/components/creatures';
 import { useTheme } from '@/theme/ThemeProvider';
+import { feedbackLessonComplete } from '@/services/feedback';
+import { useLearningStore } from '@/store/learning';
+import { getSpecies } from '@/data/species';
+import { useSpeciesUnlocks, speciesIdForLanguage } from '@/hooks/useSpeciesUnlocks';
 
 /**
  * The lesson summary.
@@ -20,6 +26,8 @@ export default function LessonSummary() {
   }>();
   const { theme, spacing } = useTheme();
   const { t } = useTranslation();
+  const languageCode = useLearningStore((s) => s.languageCode);
+  const { unlocked } = useSpeciesUnlocks();
 
   const accuracyValue = Number(accuracy ?? 0);
   const minutes = Math.max(1, Math.round(Number(durationMs ?? 0) / 60_000));
@@ -30,55 +38,126 @@ export default function LessonSummary() {
     return theme.warning;
   }, [accuracyValue, theme]);
 
+  const isMastered = accuracyValue >= 0.9;
+  const isGood = accuracyValue >= 0.8;
+  const feedbackMessage = isMastered
+    ? 'lesson.perfect'
+    : isGood
+      ? 'lesson.great'
+      : 'lesson.keepGoing';
+
+  // The lesson's own language species hosts this screen once unlocked;
+  // Doctor Bird — always unlocked — greets every learner until then.
+  const hostSpeciesId = useMemo(() => {
+    const forLanguage = languageCode ? speciesIdForLanguage(languageCode) : null;
+    return forLanguage && unlocked[forLanguage] ? forLanguage : 'doctor-bird';
+  }, [languageCode, unlocked]);
+  const host = getSpecies(hostSpeciesId);
+  const fieldNote = useMemo(
+    () => host.naturalHistory[Math.floor(Math.random() * host.naturalHistory.length)],
+    [host],
+  );
+
+  useEffect(() => {
+    feedbackLessonComplete();
+  }, []);
+
   return (
     <Screen>
-      <Text variant="title" align="center" style={{ marginTop: spacing.xl }}>
-        {t('lesson.summaryTitle')}
-      </Text>
-
-      <Card style={{ marginTop: spacing.xl }}>
-        <Text variant="caption" color="muted">
-          {t('lesson.accuracy')}
-        </Text>
-        <Text variant="display" style={{ color: tone, marginTop: spacing.xs }}>
-          {`${Math.round(accuracyValue * 100)}%`}
-        </Text>
-        <ProgressBar value={accuracyValue} color={tone} style={{ marginTop: spacing.md }} />
-
-        <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
-          <Badge label={t('lesson.timeSpent')} glyph="◷" />
-          <Badge label={t('common.minutes', { count: minutes })} />
+      <Animated.View entering={FadeInDown}>
+        <View style={{ alignItems: 'center', marginTop: spacing.xl }}>
+          <Animated.View
+            entering={BounceIn.delay(200)}
+            style={{
+              width: 108,
+              height: 108,
+              borderRadius: 54,
+              backgroundColor: theme.surfaceMuted,
+              borderWidth: 3,
+              borderColor: tone,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: spacing.md,
+            }}
+          >
+            <CreatureIllustration id={hostSpeciesId} size={82} />
+          </Animated.View>
+          <Text variant="display" align="center">
+            {t('lesson.summaryTitle')}
+          </Text>
         </View>
-      </Card>
+      </Animated.View>
 
-      <Card style={{ marginTop: spacing.lg }}>
-        <Text variant="caption" color="muted">
-          {t('lesson.nextStep')}
-        </Text>
-        <Text variant="body" style={{ marginTop: spacing.sm }}>
-          {accuracyValue >= 0.8
-            ? t('recommend.next.reason', { objective: t('learn.notStarted') })
-            : t('practice.mistakesBody')}
-        </Text>
-      </Card>
+      <Animated.View entering={FadeInDown.delay(100)}>
+        <Card style={{ marginTop: spacing.xl, borderColor: tone, borderWidth: 2 }}>
+          <Text variant="caption" color="muted">
+            {t('lesson.accuracy')}
+          </Text>
+          <Text variant="display" style={{ color: tone, marginTop: spacing.xs }}>
+            {`${Math.round(accuracyValue * 100)}%`}
+          </Text>
+          <ProgressBar value={accuracyValue} color={tone} style={{ marginTop: spacing.md }} />
 
-      <Button
-        label={t('lesson.continue')}
-        onPress={() => router.replace('/(tabs)')}
-        fullWidth
-        size="large"
-        style={{ marginTop: spacing.xxl }}
-      />
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: spacing.sm,
+              marginTop: spacing.lg,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Badge label={t(feedbackMessage)} tone="primary" />
+            <Badge label={t('lesson.timeSpent')} glyph="⏱" />
+            <Badge label={t('common.minutes', { count: minutes })} />
+          </View>
+        </Card>
+      </Animated.View>
 
-      {accuracyValue < 0.8 ? (
+      <Animated.View entering={FadeInDown.delay(150)}>
+        <Card style={{ marginTop: spacing.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Text variant="caption" color="muted" style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>
+              {t('lesson.fieldNote', { name: host.commonName })}
+            </Text>
+          </View>
+          <Text variant="small" style={{ marginTop: spacing.xs, lineHeight: 20 }}>
+            {fieldNote}
+          </Text>
+        </Card>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(200)}>
+        <Card style={{ marginTop: spacing.lg }}>
+          <Text variant="caption" color="muted">
+            {t('lesson.nextStep')}
+          </Text>
+          <Text variant="body" style={{ marginTop: spacing.sm }}>
+            {accuracyValue >= 0.8
+              ? t('recommend.next.reason', { objective: t('learn.notStarted') })
+              : t('practice.mistakesBody')}
+          </Text>
+        </Card>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(300)}>
         <Button
-          label={t('lesson.practiceThis')}
-          onPress={() => router.replace('/practice/mistakes')}
-          variant="secondary"
+          label={t('lesson.continue')}
+          onPress={() => router.replace('/(tabs)')}
           fullWidth
-          style={{ marginTop: spacing.md }}
+          size="large"
+          style={{ marginTop: spacing.xxl }}
         />
-      ) : null}
+
+        {accuracyValue < 0.8 ? (
+          <Button
+            label={t('lesson.practiceThis')}
+            onPress={() => router.replace('/practice/mistakes')}
+            variant="secondary"
+            fullWidth
+            style={{ marginTop: spacing.md }}
+          />
+        ) : null}
+      </Animated.View>
     </Screen>
   );
 }
