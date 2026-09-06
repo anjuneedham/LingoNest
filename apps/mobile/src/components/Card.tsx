@@ -3,6 +3,7 @@ import { Pressable, View, type ViewStyle } from 'react-native';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@/theme/ThemeProvider';
 import { elevation } from '@/theme/tokens';
+import { feedbackTap } from '@/services/feedback';
 
 interface CardProps {
   readonly children: React.ReactNode;
@@ -53,10 +54,15 @@ export function Card({
     scale.value = withSpring(1, { damping: 10, mass: 1 });
   };
 
+  const handlePress = () => {
+    feedbackTap();
+    onPress();
+  };
+
   return (
     <Animated.View style={[{ transform: [{ scale }] }, style]}>
       <Pressable
-        onPress={onPress}
+        onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         testID={testID}

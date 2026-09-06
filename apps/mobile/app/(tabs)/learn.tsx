@@ -1,9 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import Animated, { FadeInLeft } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Path as SvgPath } from 'react-native-svg';
 import {
   cefrDisplay,
   compareCefr,
@@ -11,11 +19,13 @@ import {
   type Cefr,
   type LevelStats,
 } from '@lingonest/core';
-import { Badge, Card, LevelPill, ProgressBar, Screen, Text } from '@/components';
+import { Badge, Card, LevelPill, ProgressBar, Screen, Skeleton, SkeletonCard, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
-import { fetchCurriculum, type CourseSummary, type UnitSummary } from '@/services/content';
+import { elevation } from '@/theme/tokens';
+import { fetchCurriculum, type CourseSummary, type LessonSummary, type UnitSummary } from '@/services/content';
 import { useSessionStore } from '@/store/session';
 import { useLearningStore } from '@/store/learning';
+import { feedbackTap } from '@/services/feedback';
 
 /**
  * The learning path.
@@ -25,6 +35,7 @@ import { useLearningStore } from '@/store/learning';
  * the learner is told matches what actually gates progression.
  */
 export default function Learn() {
+  const { spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);
@@ -45,6 +56,14 @@ export default function Learn() {
   return (
     <Screen
       loading={curriculumQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="45%" height={22} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+        </>
+      }
       error={result && !result.ok ? result.error : null}
       onRetry={() => void curriculumQuery.refetch()}
       empty={
@@ -217,76 +236,183 @@ function UnitRow({ unit }: { unit: UnitSummary }) {
         </View>
       ) : null}
 
-      <View style={{ marginTop: spacing.sm }}>
-        {unit.lessons.map((lesson) => (
-          <Animated.View key={lesson.id} entering={FadeInLeft}>
-            <Pressable
-              onPress={() => router.push(`/lesson/${lesson.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={lesson.title}
-              accessibilityHint={lesson.canDo}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: spacing.md,
-                borderBottomWidth: 1,
-                borderBottomColor: theme.border,
-              }}
-            >
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: radius.pill,
-                  borderWidth: 2,
-                  borderColor:
-                    lesson.status === 'completed'
-                      ? theme.success
-                      : lesson.status === 'in_progress'
-                        ? theme.primary
-                        : theme.border,
-                  backgroundColor:
-                    lesson.status === 'completed' ? theme.success : lesson.status === 'in_progress' ? theme.primaryMuted : 'transparent',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: spacing.md,
-                }}
-              >
-                <Text
-                  variant="caption"
-                  color={lesson.status === 'completed' ? 'inverse' : 'muted'}
-                  style={{ fontWeight: '600' }}
-                >
-                  {lesson.status === 'completed' ? '✓' : String(lesson.ordinal)}
-                </Text>
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <Text
-                  variant="body"
-                  style={{
-                    fontWeight: lesson.status === 'in_progress' ? '600' : '400',
-                    color:
-                      lesson.status === 'completed'
-                        ? theme.textMuted
-                        : lesson.status === 'in_progress'
-                          ? theme.primary
-                          : theme.text,
-                  }}
-                >
-                  {lesson.title}
-                </Text>
-                <Text variant="caption" color="muted">
-                  {t('learn.lessonMinutes', { count: lesson.estimatedMinutes })}
-                </Text>
-              </View>
-
-              {lesson.isCheckpoint ? <Badge label={t('learn.checkpoint')} tone="primary" glyph="⭐" /> : null}
-              {lesson.isReview && !lesson.isCheckpoint ? <Badge label={t('learn.review')} glyph="↻" /> : null}
-            </Pressable>
-          </Animated.View>
-        ))}
-      </View>
+      <LessonPath lessons={unit.lessons} />
     </View>
+  );
+}
+
+/**
+ * The lesson path.
+ *
+ * A winding node trail rather than a settings-style list: the curve traces
+ * how far a learner has come (the green stretch of `donePath`) and where
+ * they're headed next (the pulsing node), so a unit reads as a place to
+ * travel through rather than a menu to pick from.
+ */
+const NODE_SIZE = 60;
+const V_GAP = 112;
+const TOP_PAD = 46;
+const BOTTOM_PAD = 56;
+const AMPLITUDE_PCT = 24;
+
+function pathXPercent(index: number): number {
+  return 50 + AMPLITUDE_PCT * Math.sin((index * Math.PI) / 2);
+}
+
+function pathY(index: number): number {
+  return TOP_PAD + NODE_SIZE / 2 + index * V_GAP;
+}
+
+function buildCurve(points: ReadonlyArray<{ x: number; y: number }>): string {
+  const [first, ...rest] = points;
+  if (!first) return '';
+  let prev = first;
+  let d = `M ${prev.x} ${prev.y}`;
+  for (const point of rest) {
+    const midY = (prev.y + point.y) / 2;
+    d += ` C ${prev.x} ${midY}, ${point.x} ${midY}, ${point.x} ${point.y}`;
+    prev = point;
+  }
+  return d;
+}
+
+function LessonPath({ lessons }: { lessons: readonly LessonSummary[] }) {
+  const { theme } = useTheme();
+
+  const points = lessons.map((_, i) => ({ x: pathXPercent(i), y: pathY(i) }));
+  const totalHeight = lessons.length === 0 ? 0 : pathY(lessons.length - 1) + NODE_SIZE / 2 + BOTTOM_PAD;
+
+  // Lessons complete in order, so the first non-completed one is both where
+  // the coloured stretch of the path ends and which node gets the pulse.
+  const firstIncompleteIndex = lessons.findIndex((l) => l.status !== 'completed');
+  const progressEndIndex = firstIncompleteIndex === -1 ? lessons.length - 1 : firstIncompleteIndex;
+
+  const fullPath = buildCurve(points);
+  const donePath = progressEndIndex > 0 ? buildCurve(points.slice(0, progressEndIndex + 1)) : '';
+
+  if (lessons.length === 0) return null;
+
+  return (
+    <View style={{ marginTop: 12, position: 'relative', width: '100%', height: totalHeight }}>
+      <Svg
+        width="100%"
+        height={totalHeight}
+        viewBox={`0 0 100 ${totalHeight}`}
+        preserveAspectRatio="none"
+        style={{ position: 'absolute', top: 0, left: 0 }}
+      >
+        <SvgPath d={fullPath} stroke={theme.border} strokeWidth={5} fill="none" strokeLinecap="round" />
+        {donePath ? (
+          <SvgPath d={donePath} stroke={theme.success} strokeWidth={5} fill="none" strokeLinecap="round" />
+        ) : null}
+      </Svg>
+
+      {lessons.map((lesson, i) => {
+        const point = points[i] ?? { x: 50, y: pathY(i) };
+        return (
+          <LessonNode
+            key={lesson.id}
+            lesson={lesson}
+            index={i}
+            xPercent={point.x}
+            y={point.y}
+            isNext={i === firstIncompleteIndex}
+          />
+        );
+      })}
+    </View>
+  );
+}
+
+function LessonNode({
+  lesson,
+  index,
+  xPercent,
+  y,
+  isNext,
+}: {
+  lesson: LessonSummary;
+  index: number;
+  xPercent: number;
+  y: number;
+  isNext: boolean;
+}) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const pulse = useSharedValue(1);
+
+  useEffect(() => {
+    if (isNext) {
+      pulse.value = withRepeat(withSequence(withTiming(1.08, { duration: 700 }), withTiming(1, { duration: 700 })), -1, true);
+    }
+  }, [isNext, pulse]);
+
+  const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }));
+
+  const isDone = lesson.status === 'completed';
+  const isActive = isNext || lesson.status === 'in_progress';
+  const circleColor = isDone ? theme.success : isActive ? theme.primary : theme.surfaceMuted;
+  const glyph = isDone ? '✓' : lesson.isCheckpoint ? '⭐' : lesson.isReview ? '↻' : String(lesson.ordinal);
+
+  return (
+    <Animated.View
+      entering={FadeIn.delay(index * 50)}
+      style={{
+        position: 'absolute',
+        top: y - NODE_SIZE / 2,
+        left: `${xPercent}%`,
+        width: NODE_SIZE,
+        marginLeft: -NODE_SIZE / 2,
+        alignItems: 'center',
+      }}
+    >
+      {isNext ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: -30,
+            paddingHorizontal: 10,
+            paddingVertical: 3,
+            borderRadius: 999,
+            backgroundColor: theme.primary,
+          }}
+        >
+          <Text variant="caption" color="inverse" style={{ fontWeight: '700' }}>
+            {t('lesson.start')}
+          </Text>
+        </View>
+      ) : null}
+
+      <Animated.View style={isNext ? pulseStyle : undefined}>
+        <Pressable
+          onPress={() => {
+            feedbackTap();
+            router.push(`/lesson/${lesson.id}`);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={lesson.title}
+          accessibilityHint={lesson.canDo}
+          style={{
+            width: NODE_SIZE,
+            height: NODE_SIZE,
+            borderRadius: NODE_SIZE / 2,
+            borderWidth: 3,
+            borderColor: circleColor,
+            backgroundColor: circleColor,
+            alignItems: 'center',
+            justifyContent: 'center',
+            ...elevation.card,
+          }}
+        >
+          <Text variant="subheading" color={isDone || isActive ? 'inverse' : 'muted'} style={{ fontWeight: '700' }}>
+            {glyph}
+          </Text>
+        </Pressable>
+      </Animated.View>
+
+      <Text variant="caption" color="muted" numberOfLines={2} style={{ marginTop: 6, width: 96, textAlign: 'center' }}>
+        {lesson.title}
+      </Text>
+    </Animated.View>
   );
 }

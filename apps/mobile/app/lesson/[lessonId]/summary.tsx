@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import Animated, { FadeInDown, BounceIn } from 'react-native-reanimated';
 import { Badge, Button, Card, ProgressBar, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
+import { feedbackLessonComplete } from '@/services/feedback';
 
 /**
  * The lesson summary.
@@ -39,6 +40,10 @@ export default function LessonSummary() {
     : isGood
       ? 'lesson.great'
       : 'lesson.keepGoing';
+
+  useEffect(() => {
+    feedbackLessonComplete();
+  }, []);
 
   return (
     <Screen>

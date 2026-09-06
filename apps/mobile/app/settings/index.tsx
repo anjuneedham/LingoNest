@@ -167,6 +167,28 @@ export default function Settings() {
         />
 
         <Row
+          label={t('settings.soundEffects')}
+          right={
+            <Switch
+              value={settings.soundEffectsEnabled}
+              onValueChange={settings.setSoundEffects}
+              accessibilityLabel={t('settings.soundEffects')}
+            />
+          }
+        />
+
+        <Row
+          label={t('settings.haptics')}
+          right={
+            <Switch
+              value={settings.hapticsEnabled}
+              onValueChange={settings.setHaptics}
+              accessibilityLabel={t('settings.haptics')}
+            />
+          }
+        />
+
+        <Row
           label={t('settings.listeningSpeed')}
           right={
             <Choice

@@ -6,3 +6,4 @@ export { ProgressBar } from './ProgressBar';
 export { Badge } from './Badge';
 export { LevelPill } from './LevelPill';
 export { SkillRadar } from './SkillRadar';
+export { Skeleton, SkeletonCard } from './Skeleton';

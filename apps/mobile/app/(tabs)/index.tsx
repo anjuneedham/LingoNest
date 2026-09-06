@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { formatInZone, hoursUntil, type Recommendation } from '@lingonest/core';
-import { Badge, Button, Card, LevelPill, ProgressBar, Screen, Text } from '@/components';
+import { Badge, Button, Card, LevelPill, ProgressBar, Screen, Skeleton, SkeletonCard, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
@@ -60,6 +60,16 @@ export default function Home() {
   return (
     <Screen
       loading={snapshotQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="40%" height={13} />
+          <Skeleton width="55%" height={28} style={{ marginTop: spacing.sm }} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+          <Skeleton width="35%" height={20} style={{ marginTop: spacing.xl, marginBottom: spacing.lg }} />
+          <SkeletonCard lines={2} style={{ marginBottom: spacing.md }} />
+          <SkeletonCard lines={2} style={{ marginBottom: spacing.md }} />
+        </>
+      }
       error={result && !result.ok ? result.error : null}
       onRetry={() => void snapshotQuery.refetch()}
       onRefresh={() => void snapshotQuery.refetch()}

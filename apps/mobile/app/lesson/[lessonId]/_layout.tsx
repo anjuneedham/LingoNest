@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useStackAnimation } from '@/hooks/useStackAnimation';
 
 /**
  * Without this layout, Expo Router falls back to a default header whose
@@ -10,6 +11,7 @@ import { useTheme } from '@/theme/ThemeProvider';
  */
 export default function LessonLayout() {
   const { theme } = useTheme();
+  const animation = useStackAnimation();
   return (
     <Stack
       screenOptions={{
@@ -17,6 +19,7 @@ export default function LessonLayout() {
         headerTintColor: theme.text,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: theme.background },
+        animation,
       }}
     >
       <Stack.Screen name="index" options={{ title: '' }} />

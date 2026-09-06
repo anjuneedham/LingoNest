@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import * as SplashScreen from 'expo-splash-screen';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
+import { useStackAnimation } from '@/hooks/useStackAnimation';
 import { i18next, initI18n } from '@/i18n';
 import { subscribeToAuth, useSessionStore } from '@/store/session';
 import { startAttemptSync } from '@/services/sync';
@@ -27,6 +28,7 @@ const queryClient = new QueryClient({
 
 function RootNavigator() {
   const { theme, isDark } = useTheme();
+  const animation = useStackAnimation();
 
   return (
     <>
@@ -37,6 +39,7 @@ function RootNavigator() {
           headerTintColor: theme.text,
           headerShadowVisible: false,
           contentStyle: { backgroundColor: theme.background },
+          animation,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />

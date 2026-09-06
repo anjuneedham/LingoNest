@@ -27,6 +27,8 @@ export interface EmptyState {
 interface ScreenProps {
   readonly children?: React.ReactNode;
   readonly loading?: boolean;
+  /** A content-shaped placeholder shown instead of the spinner while loading. */
+  readonly skeleton?: React.ReactNode;
   readonly error?: AppError | null;
   readonly empty?: EmptyState | null;
   readonly onRetry?: () => void;
@@ -41,6 +43,7 @@ interface ScreenProps {
 export function Screen({
   children,
   loading = false,
+  skeleton,
   error = null,
   empty = null,
   onRetry,
@@ -56,6 +59,16 @@ export function Screen({
 
   const container = [styles.fill, { backgroundColor: theme.background }];
   const contentPadding = padded ? { padding: spacing.lg } : undefined;
+
+  if (loading && skeleton) {
+    return (
+      <SafeAreaView style={container} edges={edges} testID={testID}>
+        <View style={contentPadding} accessibilityRole="progressbar" accessibilityLabel={t('common.loading')}>
+          {skeleton}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (loading) {
     return (

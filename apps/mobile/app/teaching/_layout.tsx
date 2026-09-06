@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack } from 'expo-router';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useSessionStore } from '@/store/session';
+import { useStackAnimation } from '@/hooks/useStackAnimation';
 
 /**
  * The teacher area.
@@ -16,6 +17,7 @@ export default function TeachingLayout() {
   const { theme } = useTheme();
   const roles = useSessionStore((s) => s.roles);
   const initialising = useSessionStore((s) => s.initialising);
+  const animation = useStackAnimation();
 
   if (initialising) return null;
 
@@ -28,6 +30,7 @@ export default function TeachingLayout() {
         headerTintColor: theme.text,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: theme.background },
+        animation,
       }}
     >
       <Stack.Screen name="apply" options={{ title: '' }} />

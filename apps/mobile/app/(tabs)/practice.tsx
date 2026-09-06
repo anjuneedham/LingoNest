@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Badge, Card, Screen, Text } from '@/components';
+import { Badge, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
@@ -26,7 +26,7 @@ const PRACTICE_MODE_COLORS = {
  * preterite", not "practise grammar" (brief §58, §96).
  */
 export default function Practice() {
-  const { spacing } = useTheme();
+  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
   const languageCode = useLearningStore((s) => s.languageCode);
@@ -130,7 +130,37 @@ export default function Practice() {
   });
 
   return (
-    <Screen loading={snapshotQuery.isLoading}>
+    <Screen
+      loading={snapshotQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="30%" height={22} />
+          <Skeleton width="70%" height={13} style={{ marginTop: spacing.xs }} />
+          <View style={{ marginTop: spacing.lg }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <View
+                key={i}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: spacing.md,
+                  padding: spacing.lg,
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                }}
+              >
+                <Skeleton width={48} height={48} radius={12} />
+                <View style={{ flex: 1, marginLeft: spacing.md }}>
+                  <Skeleton width="60%" height={16} />
+                  <Skeleton width="85%" height={12} style={{ marginTop: spacing.xs }} />
+                </View>
+              </View>
+            ))}
+          </View>
+        </>
+      }
+    >
       <Text variant="title">{t('practice.title')}</Text>
       <Text variant="small" color="muted" style={{ marginTop: spacing.xs }}>
         {t('practice.chooseMode') || 'Pick a practice mode to improve your skills'}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useStackAnimation } from '@/hooks/useStackAnimation';
 
 /**
  * `index` has no title of its own, so without this layout the header falls
@@ -10,6 +11,7 @@ import { useTheme } from '@/theme/ThemeProvider';
  */
 export default function MessagesLayout() {
   const { theme } = useTheme();
+  const animation = useStackAnimation();
   return (
     <Stack
       screenOptions={{
@@ -17,6 +19,7 @@ export default function MessagesLayout() {
         headerTintColor: theme.text,
         headerShadowVisible: false,
         contentStyle: { backgroundColor: theme.background },
+        animation,
       }}
     >
       <Stack.Screen name="index" options={{ title: '' }} />
