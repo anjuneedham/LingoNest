@@ -29,7 +29,9 @@ export const ACTIVITY_REGISTRY: Readonly<Record<ActivityType, ActivityTypeDef>> 
   image_match: { type: 'image_match', skill: 'vocabulary', stage: 'discover', evaluation: 'deterministic', supportsHints: false, requiresSpeech: false, requiresAudio: false, defaultPoints: 10, labelKey: 'activity.image_match' },
   audio_recognition: { type: 'audio_recognition', skill: 'listening', stage: 'listen', evaluation: 'deterministic', supportsHints: true, requiresSpeech: false, requiresAudio: true, defaultPoints: 12, labelKey: 'activity.audio_recognition' },
   listening_comprehension: { type: 'listening_comprehension', skill: 'listening', stage: 'understand', evaluation: 'deterministic', supportsHints: true, requiresSpeech: false, requiresAudio: true, defaultPoints: 15, labelKey: 'activity.listening_comprehension' },
-  pronunciation_repeat: { type: 'pronunciation_repeat', skill: 'pronunciation', stage: 'speak', evaluation: 'assisted', supportsHints: false, requiresSpeech: true, requiresAudio: true, defaultPoints: 12, labelKey: 'activity.pronunciation_repeat' },
+  // requiresAudio is false because the player falls back to the device speech
+  // synthesiser when no recorded model exists; the content validator still warns.
+  pronunciation_repeat: { type: 'pronunciation_repeat', skill: 'pronunciation', stage: 'speak', evaluation: 'assisted', supportsHints: false, requiresSpeech: true, requiresAudio: false, defaultPoints: 12, labelKey: 'activity.pronunciation_repeat' },
   speech_response: { type: 'speech_response', skill: 'speaking', stage: 'speak', evaluation: 'ai', supportsHints: true, requiresSpeech: true, requiresAudio: false, defaultPoints: 20, labelKey: 'activity.speech_response' },
   written_response: { type: 'written_response', skill: 'writing', stage: 'apply', evaluation: 'ai', supportsHints: true, requiresSpeech: false, requiresAudio: false, defaultPoints: 20, labelKey: 'activity.written_response' },
   translation: { type: 'translation', skill: 'mediation', stage: 'practice', evaluation: 'assisted', supportsHints: true, requiresSpeech: false, requiresAudio: false, defaultPoints: 15, labelKey: 'activity.translation' },
