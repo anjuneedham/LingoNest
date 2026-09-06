@@ -7,6 +7,8 @@ import { formatMoney, packageSavingBps, type Currency } from '@lingonest/core';
 import { Badge, Button, Card, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchTeacher } from '@/services/marketplace';
+import { findOrCreateDirectConversation } from '@/services/messages';
+import { useSessionStore } from '@/store/session';
 
 /**
  * A teacher's public profile.
@@ -18,6 +20,16 @@ export default function TeacherProfile() {
   const { teacherId } = useLocalSearchParams<{ teacherId: string }>();
   const { theme, spacing } = useTheme();
   const { t } = useTranslation();
+  const profile = useSessionStore((s) => s.profile);
+  const [messaging, setMessaging] = React.useState(false);
+
+  async function message() {
+    if (!profile?.id || !teacherId) return;
+    setMessaging(true);
+    const result = await findOrCreateDirectConversation(profile.id, teacherId);
+    setMessaging(false);
+    if (result.ok) router.push(`/messages/${result.value}`);
+  }
 
   const teacherQuery = useQuery({
     queryKey: ['teacher', teacherId],
@@ -178,6 +190,16 @@ export default function TeacherProfile() {
               size="large"
               style={{ marginTop: spacing.md }}
             />
+            {profile && !profile.isMinor ? (
+              <Button
+                label={t('messages.title')}
+                onPress={() => void message()}
+                loading={messaging}
+                variant="ghost"
+                fullWidth
+                style={{ marginTop: spacing.sm }}
+              />
+            ) : null}
           </View>
         </>
       ) : null}

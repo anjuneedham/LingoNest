@@ -14,6 +14,7 @@ import { Badge, Button, Card, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase } from '@/services/supabase';
 import { cancelBooking } from '@/services/marketplace';
+import { findOrCreateBookingConversation } from '@/services/messages';
 import { useSessionStore } from '@/store/session';
 import { track } from '@/services/analytics';
 
@@ -45,6 +46,12 @@ export default function Bookings() {
     },
     enabled: Boolean(profile?.id),
   });
+
+  async function message(booking: BookingRow) {
+    if (!profile?.id) return;
+    const result = await findOrCreateBookingConversation(profile.id, booking.teacher_id, booking.id);
+    if (result.ok) router.push(`/messages/${result.value}`);
+  }
 
   const bookings = bookingsQuery.data ?? [];
   const now = Date.now();
@@ -122,6 +129,7 @@ export default function Bookings() {
               timezone={profile?.timezone ?? 'UTC'}
               busy={busy === booking.id}
               onCancel={() => void confirmCancel(booking)}
+              onMessage={() => void message(booking)}
             />
           ))}
         </>
@@ -139,6 +147,7 @@ export default function Bookings() {
               timezone={profile?.timezone ?? 'UTC'}
               busy={false}
               onCancel={() => undefined}
+              onMessage={() => void message(booking)}
             />
           ))}
         </>
@@ -163,11 +172,13 @@ function BookingCard({
   timezone,
   busy,
   onCancel,
+  onMessage,
 }: {
   booking: BookingRow;
   timezone: string;
   busy: boolean;
   onCancel: () => void;
+  onMessage: () => void;
 }) {
   const { spacing } = useTheme();
   const { t } = useTranslation();
@@ -214,6 +225,14 @@ function BookingCard({
           style={{ marginTop: spacing.md }}
         />
       ) : null}
+
+      <Button
+        label={t('messages.title')}
+        onPress={onMessage}
+        variant="ghost"
+        fullWidth
+        style={{ marginTop: spacing.sm }}
+      />
 
       {cancellable ? (
         <Button

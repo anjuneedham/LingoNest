@@ -9,6 +9,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
 import { useLearningStore } from '@/store/learning';
+import { supabase } from '@/services/supabase';
 
 /**
  * Profile.
@@ -33,6 +34,25 @@ export default function ProfileScreen() {
   });
 
   const snapshot = snapshotQuery.data?.ok ? snapshotQuery.data.value : null;
+
+  // Only offered when there is content behind it: no dead button waiting on
+  // an assessment that was never authored (brief §89).
+  const checkUpQuery = useQuery({
+    queryKey: ['assessment-available', languageCode],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('assessments')
+        .select('id, languages!inner(code)')
+        .eq('languages.code', languageCode!)
+        .in('kind', ['diagnostic', 'checkpoint'])
+        .eq('status', 'published')
+        .limit(1)
+        .maybeSingle();
+      return data?.id ?? null;
+    },
+    enabled: Boolean(languageCode),
+  });
+  const checkUpAssessmentId = checkUpQuery.data ?? null;
 
   return (
     <Screen loading={snapshotQuery.isLoading}>
@@ -87,6 +107,22 @@ export default function ProfileScreen() {
         </>
       ) : null}
 
+      {checkUpAssessmentId ? (
+        <Card style={{ marginTop: spacing.lg }}>
+          <Text variant="body">{t('assessment.levelCheckUp')}</Text>
+          <Text variant="caption" color="muted" style={{ marginTop: spacing.xs }}>
+            {t('assessment.levelCheckUpBody')}
+          </Text>
+          <Button
+            label={t('assessment.start')}
+            onPress={() => router.push(`/assessment/${checkUpAssessmentId}`)}
+            variant="secondary"
+            fullWidth
+            style={{ marginTop: spacing.md }}
+          />
+        </Card>
+      ) : null}
+
       {canAdminister ? (
         <Card style={{ marginTop: spacing.lg }}>
           <Button
@@ -108,6 +144,20 @@ export default function ProfileScreen() {
         <Button
           label={t('booking.upcoming')}
           onPress={() => router.push('/bookings')}
+          variant="ghost"
+          fullWidth
+          style={{ marginTop: spacing.sm }}
+        />
+        <Button
+          label={t('messages.title')}
+          onPress={() => router.push('/messages')}
+          variant="ghost"
+          fullWidth
+          style={{ marginTop: spacing.sm }}
+        />
+        <Button
+          label={t('community.title')}
+          onPress={() => router.push('/community')}
           variant="ghost"
           fullWidth
           style={{ marginTop: spacing.sm }}

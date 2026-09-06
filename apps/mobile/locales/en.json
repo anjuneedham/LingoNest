@@ -664,14 +664,37 @@
   "mute": "Mute",
   "reported": "Thanks — we'll look at this.",
   "guidelines": "Be kind. Everyone here is learning.",
-  "minorRestricted": "You'll be able to post once a guardian has confirmed consent."
+  "minorRestricted": "You'll be able to post once a guardian has confirmed consent.",
+  "noGroups": "No groups yet",
+  "noPosts": "No posts yet",
+  "noPostsBody": "Be the first to say something.",
+  "post": "Post",
+  "react": "Like",
+  "reacted": "Liked",
+  "noComments": "No replies yet.",
+  "commentPlaceholder": "Write a reply",
+  "reportConfirm": "Report this content to a moderator?",
+  "kind": {
+   "discussion": "Discussion",
+   "question": "Question",
+   "progress": "Progress",
+   "challenge": "Challenge"
+  },
+  "postCount": "{{count}} posts"
  },
  "messages": {
   "title": "Messages",
   "empty": "No messages yet",
   "emptyBody": "Message a teacher before or after a lesson.",
   "placeholder": "Write a message",
-  "send": "Send"
+  "send": "Send",
+  "conversations": "Conversations",
+  "noConversations": "No conversations yet",
+  "noConversationsBody": "Start one from a teacher's profile or a booking.",
+  "blocked": "You've blocked this person. Unblock them to send a message.",
+  "unblock": "Unblock",
+  "blockConfirm": "Block this person? You will no longer be able to message each other.",
+  "redacted": "This message was removed by a moderator."
  },
  "achievement": {
   "first_lesson": "First lesson",
@@ -770,5 +793,14 @@
   "remoteConfigReadOnly": "These values ship from the server and are shown here for visibility. Edit them from the database or a future config editor, not by guessing at the shape.",
   "updated": "Updated",
   "flagUpdateFailed": "Could not update this flag. Try again."
+ },
+ "assessment": {
+  "levelCheckUp": "Level check-up",
+  "levelCheckUpBody": "A short adaptive check to see whether your estimated level still matches your progress.",
+  "start": "Start check-up",
+  "inProgressTitle": "Level check-up",
+  "resultTitle": "Here is your updated estimate",
+  "done": "Done",
+  "noneAvailable": "No check-up is available for this language yet."
  }
 }

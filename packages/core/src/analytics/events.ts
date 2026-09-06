@@ -23,6 +23,8 @@ export type AnalyticsEvent =
   | { name: 'placement_started'; props: { languageCode: string; selfReport: string } }
   | { name: 'placement_completed'; props: { languageCode: string; estimatedCefr: Cefr; itemCount: number; confidence: number } }
   | { name: 'placement_skipped'; props: { languageCode: string } }
+  | { name: 'assessment_started'; props: { assessmentId: string; kind: string } }
+  | { name: 'assessment_completed'; props: { assessmentId: string; estimatedCefr: Cefr; itemCount: number; confidence: number } }
   | { name: 'lesson_started'; props: { lessonId: string; unitId: string; cefr: Cefr } }
   | { name: 'lesson_completed'; props: { lessonId: string; cefr: Cefr; accuracy: number; durationMs: number; xp: number } }
   | { name: 'lesson_abandoned'; props: { lessonId: string; atActivityIndex: number } }
