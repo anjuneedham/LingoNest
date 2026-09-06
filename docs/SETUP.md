@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node 20+
+- Node 22+
 - npm 10+
 - Supabase CLI (`npm i -g supabase`) for local DB + Edge Functions
 - Expo Go (device) or an iOS/Android simulator
