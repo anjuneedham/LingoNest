@@ -14,7 +14,8 @@
     "content:build": "npm run build --workspace @lingonest/content",
     "content:validate": "npm run validate --workspace @lingonest/content",
     "db:seed": "node scripts/seed-content.mjs",
-    "mobile": "npm run start --workspace @lingonest/mobile"
+    "mobile": "npm run start --workspace @lingonest/mobile",
+    "build:web": "npm run build --workspace @lingonest/mobile"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
