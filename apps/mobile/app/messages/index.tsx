@@ -3,7 +3,9 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Badge, Card, Screen, Text } from '@/components';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Badge, Card, Screen, Skeleton, Text } from '@/components';
+import { useTheme } from '@/theme/ThemeProvider';
 import { fetchConversations } from '@/services/messages';
 import { useSessionStore } from '@/store/session';
 
@@ -15,6 +17,7 @@ import { useSessionStore } from '@/store/session';
  * messaging is not offered (brief §65).
  */
 export default function Messages() {
+  const { theme, spacing } = useTheme();
   const { t } = useTranslation();
   const profile = useSessionStore((s) => s.profile);
 
@@ -29,11 +32,29 @@ export default function Messages() {
   return (
     <Screen
       loading={conversationsQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="40%" height={22} />
+          {[0, 1, 2].map((i) => (
+            <View key={i} style={{ marginTop: spacing.md, padding: spacing.lg }}>
+              <Skeleton width="45%" height={16} />
+            </View>
+          ))}
+        </>
+      }
       error={conversationsQuery.data && !conversationsQuery.data.ok ? conversationsQuery.data.error : null}
       onRetry={() => void conversationsQuery.refetch()}
       empty={
         conversationsQuery.data?.ok && conversations.length === 0
-          ? { title: t('messages.noConversations'), body: t('messages.noConversationsBody') }
+          ? {
+              title: t('messages.noConversations'),
+              body: t('messages.noConversationsBody'),
+              icon: (
+                <Text variant="display" style={{ marginBottom: spacing.sm }}>
+                  💬
+                </Text>
+              ),
+            }
           : null
       }
       onRefresh={() => void conversationsQuery.refetch()}
@@ -41,18 +62,23 @@ export default function Messages() {
     >
       <Text variant="title">{t('messages.title')}</Text>
 
-      {conversations.map((conversation) => (
-        <Card
-          key={conversation.id}
-          onPress={() => router.push(`/messages/${conversation.id}`)}
-          style={{ marginTop: 12 }}
-          accessibilityLabel={conversation.otherDisplayName}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="body">{conversation.otherDisplayName}</Text>
-            {conversation.unread ? <Badge label="" tone="primary" glyph="●" /> : null}
-          </View>
-        </Card>
+      {conversations.map((conversation, i) => (
+        <Animated.View key={conversation.id} entering={FadeInDown.delay(i * 60)}>
+          <Card
+            onPress={() => router.push(`/messages/${conversation.id}`)}
+            style={{
+              marginTop: spacing.md,
+              backgroundColor: conversation.unread ? theme.primaryMuted : undefined,
+              borderColor: conversation.unread ? theme.primary : undefined,
+            }}
+            accessibilityLabel={conversation.otherDisplayName}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text variant={conversation.unread ? 'bodyStrong' : 'body'}>{conversation.otherDisplayName}</Text>
+              {conversation.unread ? <Badge label="" tone="primary" glyph="●" /> : null}
+            </View>
+          </Card>
+        </Animated.View>
       ))}
     </Screen>
   );

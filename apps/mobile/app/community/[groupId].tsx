@@ -3,7 +3,8 @@ import { TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button, Card, Screen, Text } from '@/components';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Badge, Button, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { createCommunityPost, fetchCommunityPosts } from '@/services/community';
 import { useSessionStore } from '@/store/session';
@@ -52,6 +53,18 @@ export default function CommunityGroup() {
   return (
     <Screen
       loading={postsQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="100%" height={60} radius={12} />
+          {[0, 1].map((i) => (
+            <View key={i} style={{ marginTop: spacing.md, padding: spacing.lg }}>
+              <Skeleton width="30%" height={13} />
+              <Skeleton width="90%" height={16} style={{ marginTop: spacing.sm }} />
+              <Skeleton width="70%" height={13} style={{ marginTop: spacing.xs }} />
+            </View>
+          ))}
+        </>
+      }
       error={postsQuery.data && !postsQuery.data.ok ? postsQuery.data.error : null}
       onRetry={() => void postsQuery.refetch()}
       onRefresh={() => void postsQuery.refetch()}
@@ -96,24 +109,26 @@ export default function CommunityGroup() {
         </Card>
       ) : null}
 
-      {posts.map((post) => (
-        <Card key={post.id} onPress={() => router.push(`/community/post/${post.id}`)} style={{ marginTop: spacing.md }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Text variant="body">{post.authorName}</Text>
-            <Badge label={t(`community.kind.${post.kind}`)} tone="neutral" />
-          </View>
-          {post.title ? (
-            <Text variant="subheading" style={{ marginTop: spacing.xs }}>
-              {post.title}
+      {posts.map((post, i) => (
+        <Animated.View key={post.id} entering={FadeInDown.delay(i * 60)}>
+          <Card onPress={() => router.push(`/community/post/${post.id}`)} style={{ marginTop: spacing.md }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Text variant="body">{post.authorName}</Text>
+              <Badge label={t(`community.kind.${post.kind}`)} tone="neutral" />
+            </View>
+            {post.title ? (
+              <Text variant="subheading" style={{ marginTop: spacing.xs }}>
+                {post.title}
+              </Text>
+            ) : null}
+            <Text variant="body" color="muted" style={{ marginTop: spacing.xs }} numberOfLines={4}>
+              {post.body}
             </Text>
-          ) : null}
-          <Text variant="body" color="muted" style={{ marginTop: spacing.xs }} numberOfLines={4}>
-            {post.body}
-          </Text>
-          <Text variant="caption" color="muted" style={{ marginTop: spacing.sm }}>
-            {t('community.replies', { count: post.replyCount })}
-          </Text>
-        </Card>
+            <Text variant="caption" color="muted" style={{ marginTop: spacing.sm }}>
+              {t('community.replies', { count: post.replyCount })}
+            </Text>
+          </Card>
+        </Animated.View>
       ))}
     </Screen>
   );

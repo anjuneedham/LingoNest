@@ -3,7 +3,8 @@ import { Alert, TextInput, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button, Card, Screen, Text } from '@/components';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Badge, Button, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { addComment, fetchPost, toggleReaction } from '@/services/community';
 import { reportEntity } from '@/services/messages';
@@ -74,6 +75,14 @@ export default function CommunityPost() {
   return (
     <Screen
       loading={postQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="30%" height={13} />
+          <Skeleton width="70%" height={22} style={{ marginTop: spacing.sm }} />
+          <Skeleton width="100%" height={16} style={{ marginTop: spacing.md }} />
+          <Skeleton width="90%" height={16} style={{ marginTop: spacing.xs }} />
+        </>
+      }
       error={postQuery.data && !postQuery.data.ok ? postQuery.data.error : null}
       onRetry={() => void postQuery.refetch()}
     >
@@ -111,15 +120,17 @@ export default function CommunityPost() {
               {t('community.noComments')}
             </Text>
           ) : (
-            data.comments.map((comment) => (
-              <Card key={comment.id} style={{ marginTop: spacing.sm }}>
-                <Text variant="small" color="muted">
-                  {comment.authorName}
-                </Text>
-                <Text variant="body" style={{ marginTop: 2 }}>
-                  {comment.body}
-                </Text>
-              </Card>
+            data.comments.map((comment, i) => (
+              <Animated.View key={comment.id} entering={FadeInDown.delay(i * 60)}>
+                <Card style={{ marginTop: spacing.sm }}>
+                  <Text variant="small" color="muted">
+                    {comment.authorName}
+                  </Text>
+                  <Text variant="body" style={{ marginTop: 2 }}>
+                    {comment.body}
+                  </Text>
+                </Card>
+              </Animated.View>
             ))
           )}
 
