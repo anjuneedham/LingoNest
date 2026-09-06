@@ -60,6 +60,31 @@ export default function ProfileScreen() {
 
       {snapshot ? (
         <>
+          {/* Quick Stats */}
+          <View style={{ marginTop: spacing.lg, flexDirection: 'row', gap: spacing.md }}>
+            <Card style={{ flex: 1, backgroundColor: theme.surface }}>
+              <Text variant="caption" color="muted">
+                {t('home.streakDays', { count: 0 }).split('{')[0]}
+              </Text>
+              <Text
+                variant="display"
+                color="streak"
+                style={{ marginTop: spacing.xs, fontSize: 28 }}
+              >
+                🔥 {snapshot.streak.current}
+              </Text>
+            </Card>
+            <Card style={{ flex: 1 }}>
+              <Text variant="caption" color="muted">
+                {t('common.level') || 'Level'}
+              </Text>
+              <View style={{ marginTop: spacing.xs }}>
+                <LevelPill level={snapshot.levels.overall ?? null} size="small" />
+              </View>
+            </Card>
+          </View>
+
+          {/* Level Card */}
           <Card style={{ marginTop: spacing.lg }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text variant="subheading">{snapshot.languageName}</Text>
@@ -94,14 +119,24 @@ export default function ProfileScreen() {
             </View>
           </Card>
 
+          {/* Achievements Card */}
           <Card style={{ marginTop: spacing.lg }}>
-            <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' }}>
+            <Text variant="subheading">
+              {t('achievements.title') || 'Achievements'}
+            </Text>
+            <View style={{ marginTop: spacing.md, flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap' }}>
               <Badge
                 label={t('home.streakDays', { count: snapshot.streak.current })}
                 tone="streak"
-                glyph="▲"
+                glyph="🔥"
               />
-              <Badge label={t('common.words', { count: snapshot.dueVocabularyCount })} glyph="↻" />
+              {snapshot.streak.current >= 7 ? (
+                <Badge label="Week Warrior" glyph="⭐" />
+              ) : null}
+              {snapshot.streak.current >= 30 ? (
+                <Badge label="Dedicated" glyph="👑" />
+              ) : null}
+              <Badge label={t('common.words', { count: snapshot.dueVocabularyCount })} glyph="📚" />
             </View>
           </Card>
         </>

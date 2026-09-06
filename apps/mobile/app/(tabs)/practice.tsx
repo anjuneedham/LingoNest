@@ -9,6 +9,16 @@ import { fetchHomeSnapshot } from '@/services/learner';
 import { useSessionStore } from '@/store/session';
 import { useLearningStore } from '@/store/learning';
 
+const PRACTICE_MODE_COLORS = {
+  conversation: '#8B5CF6',
+  review: '#EC4899',
+  speaking: '#F59E0B',
+  listening: '#06B6D4',
+  writing: '#3B82F6',
+  mistakes: '#EF4444',
+  quick: '#10B981',
+} as const;
+
 /**
  * Practice.
  *
@@ -38,6 +48,8 @@ export default function Practice() {
       body: t('practice.aiConversationBody'),
       route: '/practice/conversation',
       glyph: '💬',
+      minutes: 5,
+      color: PRACTICE_MODE_COLORS.conversation,
     },
     {
       key: 'review',
@@ -46,6 +58,9 @@ export default function Practice() {
       route: '/practice/review',
       glyph: '↻',
       badge: dueCount > 0 ? String(dueCount) : undefined,
+      minutes: 10,
+      color: PRACTICE_MODE_COLORS.review,
+      isPriority: dueCount > 0,
     },
     {
       key: 'speaking',
@@ -53,6 +68,8 @@ export default function Practice() {
       body: t('practice.speakingBody'),
       route: '/practice/speaking',
       glyph: '🎙',
+      minutes: 8,
+      color: PRACTICE_MODE_COLORS.speaking,
     },
     {
       key: 'listening',
@@ -60,6 +77,8 @@ export default function Practice() {
       body: t('practice.listeningBody'),
       route: '/practice/listening',
       glyph: '🎧',
+      minutes: 7,
+      color: PRACTICE_MODE_COLORS.listening,
     },
     {
       key: 'writing',
@@ -67,6 +86,8 @@ export default function Practice() {
       body: t('practice.writingBody'),
       route: '/practice/writing',
       glyph: '✎',
+      minutes: 6,
+      color: PRACTICE_MODE_COLORS.writing,
     },
     {
       key: 'mistakes',
@@ -76,6 +97,9 @@ export default function Practice() {
         : t('practice.mistakesBody'),
       route: '/practice/mistakes',
       glyph: '⚠',
+      minutes: 5,
+      color: PRACTICE_MODE_COLORS.mistakes,
+      isPriority: Boolean(topMistake),
     },
     {
       key: 'quick',
@@ -83,35 +107,70 @@ export default function Practice() {
       body: t('practice.quickBody'),
       route: '/practice/quick',
       glyph: '⚡',
+      minutes: 2,
+      color: PRACTICE_MODE_COLORS.quick,
     },
   ] as const;
+
+  const sortedOptions = [...options].sort((a, b) => {
+    if (a.isPriority && !b.isPriority) return -1;
+    if (!a.isPriority && b.isPriority) return 1;
+    return 0;
+  });
 
   return (
     <Screen loading={snapshotQuery.isLoading}>
       <Text variant="title">{t('practice.title')}</Text>
+      <Text variant="small" color="muted" style={{ marginTop: spacing.xs }}>
+        {t('practice.chooseMode') || 'Pick a practice mode to improve your skills'}
+      </Text>
 
       <View style={{ marginTop: spacing.lg }}>
-        {options.map((option) => (
+        {sortedOptions.map((option) => (
           <Card
             key={option.key}
             onPress={() => router.push(option.route)}
-            style={{ marginBottom: spacing.md }}
+            raised={option.isPriority}
+            style={{
+              marginBottom: spacing.md,
+              borderLeftWidth: 4,
+              borderLeftColor: 'color' in option ? option.color : 'transparent',
+            }}
             accessibilityLabel={option.title}
             accessibilityHint={option.body}
           >
             <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-              <Text variant="heading" style={{ marginRight: spacing.md }}>
-                {option.glyph}
-              </Text>
+              <View
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  backgroundColor: option.color + '20',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: spacing.md,
+                }}
+              >
+                <Text variant="heading">{option.glyph}</Text>
+              </View>
               <View style={{ flex: 1 }}>
-                <Text variant="subheading">{option.title}</Text>
-                <Text variant="small" color="muted" style={{ marginTop: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant={option.isPriority ? 'bodyStrong' : 'subheading'}>
+                    {option.title}
+                  </Text>
+                  {option.isPriority && 'badge' in option && option.badge ? (
+                    <Badge label={option.badge} tone="danger" glyph="⭐" />
+                  ) : null}
+                </View>
+                <Text variant="small" color="muted" style={{ marginTop: spacing.xs }}>
                   {option.body}
                 </Text>
               </View>
-              {'badge' in option && option.badge ? (
-                <Badge label={option.badge} tone="primary" />
-              ) : null}
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text variant="caption" color="muted">
+                  {option.minutes}m
+                </Text>
+              </View>
             </View>
           </Card>
         ))}

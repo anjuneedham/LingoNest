@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInLeft } from 'react-native-reanimated';
 import {
   cefrDisplay,
   compareCefr,
@@ -109,10 +110,18 @@ function CourseRow({
     return evaluateLevelReadiness(course.cefr, stats);
   }, [isAhead, course.cefr, lessons, completed]);
 
+  const isCompleted = progress === 1;
+  const isCurrent = course.cefr === currentLevel;
+
   return (
     <Card
       onPress={onToggle}
-      style={{ marginTop: spacing.lg }}
+      raised={isCurrent}
+      style={{
+        marginTop: spacing.lg,
+        borderColor: isCurrent ? theme.primary : isCompleted ? theme.success : undefined,
+        borderWidth: isCurrent || isCompleted ? 2 : 1,
+      }}
       accessibilityLabel={`${cefrDisplay(course.cefr)} ${course.title}`}
       accessibilityHint={expanded ? undefined : t('common.seeAll')}
     >
@@ -120,8 +129,11 @@ function CourseRow({
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             <LevelPill level={course.cefr} size="small" />
-            {course.cefr === currentLevel ? (
-              <Badge label={t('learn.currentLevel')} tone="primary" glyph="◆" />
+            {isCurrent ? (
+              <Badge label={t('learn.currentLevel')} tone="primary" glyph="✨" />
+            ) : null}
+            {isCompleted ? (
+              <Badge label={t('learn.completed') || 'Completed'} tone="success" glyph="✓" />
             ) : null}
             {isAhead && readiness && !readiness.ready ? (
               <Badge label={t('learn.locked')} glyph="🔒" />
@@ -144,6 +156,7 @@ function CourseRow({
           level: cefrDisplay(course.cefr),
         })}
         style={{ marginTop: spacing.md }}
+        color={isCompleted ? theme.success : isCurrent ? theme.primary : undefined}
       />
 
       {/* Locked levels explain themselves rather than showing a padlock. */}
@@ -206,48 +219,72 @@ function UnitRow({ unit }: { unit: UnitSummary }) {
 
       <View style={{ marginTop: spacing.sm }}>
         {unit.lessons.map((lesson) => (
-          <Pressable
-            key={lesson.id}
-            onPress={() => router.push(`/lesson/${lesson.id}`)}
-            accessibilityRole="button"
-            accessibilityLabel={lesson.title}
-            accessibilityHint={lesson.canDo}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingVertical: spacing.md,
-              borderBottomWidth: 1,
-              borderBottomColor: theme.border,
-            }}
-          >
-            <View
+          <Animated.View key={lesson.id} entering={FadeInLeft}>
+            <Pressable
+              onPress={() => router.push(`/lesson/${lesson.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={lesson.title}
+              accessibilityHint={lesson.canDo}
               style={{
-                width: 26,
-                height: 26,
-                borderRadius: radius.pill,
-                borderWidth: 2,
-                borderColor: lesson.status === 'completed' ? theme.success : theme.border,
-                backgroundColor: lesson.status === 'completed' ? theme.success : 'transparent',
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: spacing.md,
+                paddingVertical: spacing.md,
+                borderBottomWidth: 1,
+                borderBottomColor: theme.border,
               }}
             >
-              <Text variant="caption" color={lesson.status === 'completed' ? 'inverse' : 'muted'}>
-                {lesson.status === 'completed' ? '✓' : String(lesson.ordinal)}
-              </Text>
-            </View>
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: radius.pill,
+                  borderWidth: 2,
+                  borderColor:
+                    lesson.status === 'completed'
+                      ? theme.success
+                      : lesson.status === 'started'
+                        ? theme.primary
+                        : theme.border,
+                  backgroundColor:
+                    lesson.status === 'completed' ? theme.success : lesson.status === 'started' ? theme.primaryMuted : 'transparent',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: spacing.md,
+                }}
+              >
+                <Text
+                  variant="caption"
+                  color={lesson.status === 'completed' ? 'inverse' : 'muted'}
+                  style={{ fontWeight: '600' }}
+                >
+                  {lesson.status === 'completed' ? '✓' : String(lesson.ordinal)}
+                </Text>
+              </View>
 
-            <View style={{ flex: 1 }}>
-              <Text variant="body">{lesson.title}</Text>
-              <Text variant="caption" color="muted">
-                {t('learn.lessonMinutes', { count: lesson.estimatedMinutes })}
-              </Text>
-            </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  variant="body"
+                  style={{
+                    fontWeight: lesson.status === 'started' ? '600' : '400',
+                    color:
+                      lesson.status === 'completed'
+                        ? theme.textMuted
+                        : lesson.status === 'started'
+                          ? theme.primary
+                          : theme.text,
+                  }}
+                >
+                  {lesson.title}
+                </Text>
+                <Text variant="caption" color="muted">
+                  {t('learn.lessonMinutes', { count: lesson.estimatedMinutes })}
+                </Text>
+              </View>
 
-            {lesson.isCheckpoint ? <Badge label={t('learn.checkpoint')} tone="primary" glyph="◈" /> : null}
-            {lesson.isReview && !lesson.isCheckpoint ? <Badge label={t('learn.review')} glyph="↻" /> : null}
-          </Pressable>
+              {lesson.isCheckpoint ? <Badge label={t('learn.checkpoint')} tone="primary" glyph="⭐" /> : null}
+              {lesson.isReview && !lesson.isCheckpoint ? <Badge label={t('learn.review')} glyph="↻" /> : null}
+            </Pressable>
+          </Animated.View>
         ))}
       </View>
     </View>
