@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button, Screen, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { supabase, isBackendConfigured } from '@/services/supabase';
@@ -93,9 +94,24 @@ export default function SignIn() {
         />
 
         {error ? (
-          <Text variant="small" color="danger" style={{ marginBottom: spacing.md }}>
-            {error}
-          </Text>
+          <Animated.View
+            entering={FadeInDown}
+            style={{
+              padding: spacing.md,
+              borderRadius: radius.md,
+              backgroundColor: theme.dangerMuted,
+              marginBottom: spacing.md,
+              borderLeftWidth: 4,
+              borderLeftColor: theme.danger,
+            }}
+          >
+            <Text variant="small" color="danger" style={{ fontWeight: '600' }}>
+              ⚠️ {t('common.error') || 'Error'}
+            </Text>
+            <Text variant="small" color="danger" style={{ marginTop: spacing.xs }}>
+              {error}
+            </Text>
+          </Animated.View>
         ) : null}
 
         <Button
