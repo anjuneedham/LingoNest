@@ -1,0 +1,50 @@
+name: Deploy Supabase
+
+# Applies supabase/migrations against the real project and seeds the
+# curriculum on every push to main. Both steps are idempotent (the
+# migrations are already verified in CI against a throwaway Postgres by
+# scripts/verify-migrations.sh; db:seed upserts by natural key), so a push
+# that touches nothing here is a fast no-op rather than a risk.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "packages/content/**"
+      - "scripts/seed-content.mjs"
+      - ".github/workflows/deploy-supabase.yml"
+  workflow_dispatch: {}
+
+jobs:
+  migrate-and-seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Push migrations
+        run: supabase db push --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.${SUPABASE_PROJECT_ID}.supabase.co:5432/postgres"
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Build content bundles
+        run: npm run content:build
+
+      - name: Seed curriculum
+        run: npm run db:seed
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
