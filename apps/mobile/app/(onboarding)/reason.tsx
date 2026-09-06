@@ -62,10 +62,12 @@ export default function ChooseReason() {
           <Card
             key={reason}
             onPress={() => setSelected(reason)}
+            raised={selected === reason}
             style={{
               marginBottom: spacing.sm,
               borderColor: selected === reason ? theme.primary : theme.border,
               borderWidth: 2,
+              backgroundColor: selected === reason ? theme.primaryMuted : undefined,
             }}
             accessibilityLabel={t(`onboarding.reason.${reason}`)}
           >

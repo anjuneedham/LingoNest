@@ -96,10 +96,12 @@ export default function ChooseGoal() {
           <Card
             key={goal.key}
             onPress={() => setMinutes(goal.minutes)}
+            raised={minutes === goal.minutes}
             style={{
               marginBottom: spacing.sm,
               borderWidth: 2,
               borderColor: minutes === goal.minutes ? theme.primary : theme.border,
+              backgroundColor: minutes === goal.minutes ? theme.primaryMuted : undefined,
             }}
             accessibilityLabel={t(`onboarding.goal.${goal.key}`)}
           >
