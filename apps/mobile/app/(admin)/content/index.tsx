@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LAUNCH_LANGUAGES } from '@lingonest/content';
 import type { ContentStatus } from '@lingonest/core';
-import { Badge, Button, Card, Screen, Text } from '@/components';
+import { Badge, Button, Card, Screen, Skeleton, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchContentTree } from '@/services/admin';
 
@@ -40,6 +40,18 @@ export default function ContentTree() {
   return (
     <Screen
       loading={treeQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="30%" height={22} />
+          <Skeleton width="90%" height={32} style={{ marginTop: spacing.md, borderRadius: 999 }} />
+          {[0, 1].map((i) => (
+            <View key={i} style={{ marginTop: spacing.lg, padding: spacing.lg }}>
+              <Skeleton width="50%" height={18} />
+              <Skeleton width="80%" height={40} style={{ marginTop: spacing.md, borderRadius: 12 }} />
+            </View>
+          ))}
+        </>
+      }
       error={treeQuery.data && !treeQuery.data.ok ? treeQuery.data.error : null}
       onRetry={() => void treeQuery.refetch()}
       empty={

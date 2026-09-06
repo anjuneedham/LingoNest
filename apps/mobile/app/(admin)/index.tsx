@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Badge, Card, Screen, Text } from '@/components';
+import { Badge, Card, Screen, Skeleton, SkeletonCard, Text } from '@/components';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fetchAdminOverview } from '@/services/admin';
 import { useSessionStore } from '@/store/session';
@@ -33,6 +33,17 @@ export default function AdminDashboard() {
   return (
     <Screen
       loading={overviewQuery.isLoading}
+      skeleton={
+        <>
+          <Skeleton width="45%" height={22} />
+          <SkeletonCard lines={2} style={{ marginTop: spacing.lg }} />
+          {[0, 1, 2, 3].map((i) => (
+            <View key={i} style={{ marginTop: spacing.md, padding: spacing.lg }}>
+              <Skeleton width="60%" height={16} />
+            </View>
+          ))}
+        </>
+      }
       error={overviewQuery.data && !overviewQuery.data.ok ? overviewQuery.data.error : null}
       onRetry={() => void overviewQuery.refetch()}
     >
