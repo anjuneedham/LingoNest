@@ -38,10 +38,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install PostgreSQL 16
+      - name: Install PostgreSQL 17
+        # Matches supabase/config.toml's db.major_version — Ubuntu's default
+        # archive only ships the version current at release time, so this
+        # needs the official PostgreSQL apt repository.
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-16
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-17
 
       - name: Apply migrations and run schema assertions
         run: bash scripts/verify-migrations.sh

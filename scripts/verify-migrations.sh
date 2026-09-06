@@ -17,10 +17,10 @@ if [ "$(id -u)" = "0" ]; then
   ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
   # The unprivileged user needs to read the repository.
   chmod -R a+rX "$ROOT_DIR/supabase" "$ROOT_DIR/scripts"
-  exec su "$RUN_AS" -c "PGBIN='${PGBIN:-/usr/lib/postgresql/16/bin}' PATH='$PATH' bash '$SELF'"
+  exec su "$RUN_AS" -c "PGBIN='${PGBIN:-/usr/lib/postgresql/17/bin}' PATH='$PATH' bash '$SELF'"
 fi
 
-PGBIN="${PGBIN:-/usr/lib/postgresql/16/bin}"
+PGBIN="${PGBIN:-/usr/lib/postgresql/17/bin}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORKDIR="$(mktemp -d)"
 PGDATA="$WORKDIR/pgdata"

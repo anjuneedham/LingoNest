@@ -1,6 +1,6 @@
 -- ---------------------------------------------------------------------------
 -- Minimal stand-in for the parts of a Supabase project that the migrations
--- depend on. Used only to verify the migrations against a plain Postgres 16
+-- depend on. Used only to verify the migrations against a plain Postgres 17
 -- instance in CI; a real project already provides all of this.
 -- ---------------------------------------------------------------------------
 
