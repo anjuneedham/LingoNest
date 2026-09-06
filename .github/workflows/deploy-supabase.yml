@@ -34,7 +34,14 @@ jobs:
         # Installed via npm rather than supabase/setup-cli@v1: that action
         # resolves "latest" through GitHub's unauthenticated releases API,
         # which is rate-limited and fails intermittently on shared runners.
-        run: npx -y supabase@latest db push --db-url "postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.${SUPABASE_PROJECT_ID}.supabase.co:5432/postgres"
+        #
+        # Connects through Supavisor (the pooler) rather than
+        # db.<project>.supabase.co: that direct host is IPv6-only unless the
+        # project has the paid IPv4 add-on, and GitHub-hosted runners cannot
+        # actually reach it (confirmed: same IPv6 address, ECONNREFUSED).
+        # aws-0-us-east-1 matches this project's region (Settings ->
+        # Database) — update it if the project ever migrates region.
+        run: npx -y supabase@latest db push --db-url "postgresql://postgres.${SUPABASE_PROJECT_ID}:${SUPABASE_DB_PASSWORD}@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
